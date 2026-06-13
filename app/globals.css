@@ -1,0 +1,544 @@
+@import "tailwindcss";
+
+/* ═══════════════════════════════════════════════════════════
+   ORBIT — Design System Tokens
+   Tailwind v4 · @theme block registers all tokens as both
+   CSS custom properties AND Tailwind utility classes.
+
+   Usage examples:
+     bg-orbit-violet-500      text-orbit-teal-300
+     border-orbit-mist-800    ring-orbit-violet-500
+     bg-orbit-void-900        text-orbit-mist-400
+════════════════════════════════════════════════════════════ */
+
+@theme {
+  /* ─────────────────────────────────────────────
+     FONTS
+     Import via next/font or <link> in layout.tsx.
+     Inter → UI text   JetBrains Mono → data/tokens
+  ───────────────────────────────────────────── */
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  /* ─────────────────────────────────────────────
+     VOID — backgrounds & app chrome
+     11 stops: darkest space to mid-dark surface.
+  ───────────────────────────────────────────── */
+  --color-orbit-void-950: #07070a;
+  --color-orbit-void-900: #0a0a0e; /* app root bg */
+  --color-orbit-void-800: #0f0f14; /* sidebar bg  */
+  --color-orbit-void-700: #15151c; /* card bg     */
+  --color-orbit-void-600: #1c1c26;
+  --color-orbit-void-500: #232330; /* elevated    */
+  --color-orbit-void-400: #2c2c3d;
+  --color-orbit-void-300: #36364a;
+  --color-orbit-void-200: #424258;
+  --color-orbit-void-100: #555568;
+  --color-orbit-void-50: #6a6a7a;
+
+  /* ─────────────────────────────────────────────
+     MIST — borders, dividers, text on dark
+     Alpha-based so they layer correctly on any
+     void background without hue shift.
+  ───────────────────────────────────────────── */
+  --color-orbit-mist-900: rgba(255, 255, 255, 0.04); /* subtle surface tint  */
+  --color-orbit-mist-800: rgba(255, 255, 255, 0.07); /* default border       */
+  --color-orbit-mist-700: rgba(255, 255, 255, 0.1); /* hover border         */
+  --color-orbit-mist-600: rgba(255, 255, 255, 0.18); /* strong border        */
+  --color-orbit-mist-500: rgba(255, 255, 255, 0.28); /* placeholder text     */
+  --color-orbit-mist-400: rgba(255, 255, 255, 0.42); /* secondary text       */
+  --color-orbit-mist-300: rgba(255, 255, 255, 0.6); /* tertiary text        */
+  --color-orbit-mist-200: rgba(255, 255, 255, 0.75); /* secondary label      */
+  --color-orbit-mist-100: rgba(255, 255, 255, 0.9); /* near-primary text    */
+  --color-orbit-mist-50: #ffffff; /* primary text         */
+
+  /* ─────────────────────────────────────────────
+     VIOLET — primary brand, actions, identity
+     500 = primary CTA / logo
+     300 = score numbers, links, active nav text
+  ───────────────────────────────────────────── */
+  --color-orbit-violet-950: #1a1635;
+  --color-orbit-violet-900: #231e4a;
+  --color-orbit-violet-800: #302860;
+  --color-orbit-violet-700: #4a3d8f;
+  --color-orbit-violet-600: #6352c8;
+  --color-orbit-violet-500: #7c6ef7; /* PRIMARY */
+  --color-orbit-violet-400: #9a8ef9;
+  --color-orbit-violet-300: #b5a9fa; /* LIGHT ACCENT */
+  --color-orbit-violet-200: #cfc9fc;
+  --color-orbit-violet-100: #e8e4fe;
+  --color-orbit-violet-50: #f4f2ff;
+
+  /* ─────────────────────────────────────────────
+     TEAL — money, payouts, success, deposits
+     500 = primary teal
+     300 = text on dark bg badges / stat numbers
+  ───────────────────────────────────────────── */
+  --color-orbit-teal-950: #041e18;
+  --color-orbit-teal-900: #072e25;
+  --color-orbit-teal-800: #0c4035;
+  --color-orbit-teal-700: #125547;
+  --color-orbit-teal-600: #1a7a65;
+  --color-orbit-teal-500: #24a688; /* PRIMARY */
+  --color-orbit-teal-400: #3dbf9e;
+  --color-orbit-teal-300: #5acea7; /* LIGHT ACCENT */
+  --color-orbit-teal-200: #8ddec4;
+  --color-orbit-teal-100: #bfeede;
+  --color-orbit-teal-50: #e8faf5;
+
+  /* ─────────────────────────────────────────────
+     AMBER — warnings, pending states
+  ───────────────────────────────────────────── */
+  --color-orbit-amber-950: #1f1204;
+  --color-orbit-amber-900: #311c06;
+  --color-orbit-amber-800: #4a2b09;
+  --color-orbit-amber-700: #6b3f0d;
+  --color-orbit-amber-600: #975c14;
+  --color-orbit-amber-500: #c47d1c; /* PRIMARY */
+  --color-orbit-amber-400: #e09535;
+  --color-orbit-amber-300: #f0b055; /* LIGHT ACCENT */
+  --color-orbit-amber-200: #f8cc85;
+  --color-orbit-amber-100: #fce4b8;
+  --color-orbit-amber-50: #fef5e4;
+
+  /* ─────────────────────────────────────────────
+     CRIMSON — errors, missed payments, danger
+  ───────────────────────────────────────────── */
+  --color-orbit-crimson-950: #1a0505;
+  --color-orbit-crimson-900: #2a0808;
+  --color-orbit-crimson-800: #420e0e;
+  --color-orbit-crimson-700: #641515;
+  --color-orbit-crimson-600: #8f2020;
+  --color-orbit-crimson-500: #bf3030; /* PRIMARY */
+  --color-orbit-crimson-400: #d94f4f;
+  --color-orbit-crimson-300: #e87070; /* LIGHT ACCENT */
+  --color-orbit-crimson-200: #f2a0a0;
+  --color-orbit-crimson-100: #f9d0d0;
+  --color-orbit-crimson-50: #fdf0f0;
+
+  /* ─────────────────────────────────────────────
+     BORDER RADIUS
+     Tailwind v4: generates rounded-orbit-* utilities
+  ───────────────────────────────────────────── */
+  --radius-orbit-sm: 6px;
+  --radius-orbit-md: 8px;
+  --radius-orbit-lg: 12px;
+  --radius-orbit-xl: 16px;
+  --radius-orbit-2xl: 20px;
+
+  /* ─────────────────────────────────────────────
+     SPACING — 4px base grid
+     Generates gap-orbit-*, p-orbit-*, m-orbit-*
+  ───────────────────────────────────────────── */
+  --spacing-orbit-1: 4px;
+  --spacing-orbit-2: 8px;
+  --spacing-orbit-3: 12px;
+  --spacing-orbit-4: 16px;
+  --spacing-orbit-5: 20px;
+  --spacing-orbit-6: 24px;
+  --spacing-orbit-8: 32px;
+  --spacing-orbit-10: 40px;
+  --spacing-orbit-12: 48px;
+  --spacing-orbit-16: 64px;
+
+  /* ─────────────────────────────────────────────
+     TRANSITIONS
+     Use as: transition-[var(--transition-orbit-base)]
+     or reference directly in inline styles / @layer
+  ───────────────────────────────────────────── */
+  --ease-orbit-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-orbit-inout: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-orbit-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  --duration-orbit-fast: 100ms;
+  --duration-orbit-base: 160ms;
+  --duration-orbit-slow: 280ms;
+
+  /* ─────────────────────────────────────────────
+     SHADCN UI MAPPING
+     Map standard tailwind v4 classes to Orbit brand
+  ───────────────────────────────────────────── */
+  --color-background: var(--orbit-bg-app);
+  --color-foreground: var(--orbit-text-primary);
+
+  --color-card: var(--orbit-bg-card);
+  --color-card-foreground: var(--orbit-text-primary);
+
+  --color-popover: var(--orbit-bg-elevated);
+  --color-popover-foreground: var(--orbit-text-primary);
+
+  --color-primary: var(--orbit-brand);
+  --color-primary-foreground: #ffffff;
+
+  --color-secondary: var(--color-orbit-mist-900);
+  --color-secondary-foreground: var(--orbit-text-primary);
+
+  --color-muted: var(--color-orbit-mist-900);
+  --color-muted-foreground: var(--orbit-text-muted);
+
+  --color-accent: var(--orbit-brand-bg);
+  --color-accent-foreground: var(--color-orbit-violet-300);
+
+  --color-destructive: var(--orbit-danger);
+  --color-destructive-foreground: #ffffff;
+
+  --color-border: var(--orbit-border);
+  --color-input: var(--orbit-border);
+  --color-ring: var(--color-orbit-violet-500);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SEMANTIC ALIASES
+   These are plain CSS custom properties — not in @theme —
+   so they don't generate Tailwind utilities on their own.
+   Use them in @layer components or inline styles where you
+   want a named semantic rather than a raw ramp value.
+
+   Reference in Tailwind via:  bg-[var(--orbit-bg-app)]
+                                text-[var(--orbit-text-primary)]
+════════════════════════════════════════════════════════════ */
+
+:root {
+  color-scheme: dark;
+
+  /* Backgrounds */
+  --orbit-bg-app: var(--color-orbit-void-900);
+  --orbit-bg-sidebar: var(--color-orbit-void-800);
+  --orbit-bg-card: var(--color-orbit-void-700);
+  --orbit-bg-elevated: var(--color-orbit-void-500);
+
+  /* Borders */
+  --orbit-border: var(--color-orbit-mist-800);
+  --orbit-border-hover: var(--color-orbit-mist-700);
+  --orbit-border-strong: var(--color-orbit-mist-600);
+
+  /* Text */
+  --orbit-text-primary: var(--color-orbit-mist-50);
+  --orbit-text-secondary: var(--color-orbit-mist-400);
+  --orbit-text-muted: var(--color-orbit-mist-500);
+  --orbit-text-hint: var(--color-orbit-mist-300);
+
+  /* Brand */
+  --orbit-brand: var(--color-orbit-violet-500);
+  --orbit-brand-light: var(--color-orbit-violet-300);
+  --orbit-brand-bg: rgba(124, 110, 247, 0.12);
+  --orbit-brand-border: rgba(124, 110, 247, 0.28);
+
+  /* Success (money / payouts) */
+  --orbit-success: var(--color-orbit-teal-300);
+  --orbit-success-bg: rgba(90, 206, 167, 0.1);
+  --orbit-success-border: rgba(90, 206, 167, 0.22);
+
+  /* Warning (pending) */
+  --orbit-warning: var(--color-orbit-amber-300);
+  --orbit-warning-bg: rgba(240, 176, 85, 0.1);
+  --orbit-warning-border: rgba(240, 176, 85, 0.22);
+
+  /* Danger (overdue / error) */
+  --orbit-danger: var(--color-orbit-crimson-400);
+  --orbit-danger-bg: rgba(217, 79, 79, 0.1);
+  --orbit-danger-border: rgba(217, 79, 79, 0.22);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   BASE STYLES
+   Applied globally — sets the dark canvas and base type.
+════════════════════════════════════════════════════════════ */
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    background-color: var(--orbit-bg-app);
+    color: var(--orbit-text-primary);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  /* Scrollbars — subtle dark-mode style */
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-orbit-mist-700);
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-orbit-mist-600);
+  }
+
+  /* Focus ring — use violet, not browser default blue */
+  :focus-visible {
+    outline: 2px solid var(--color-orbit-violet-500);
+    outline-offset: 2px;
+    border-radius: var(--radius-orbit-sm);
+  }
+
+  /* Text selection — brand violet */
+  ::selection {
+    background-color: rgba(124, 110, 247, 0.3);
+    color: #ffffff;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   COMPONENT LAYER
+   Pre-built compound classes for recurring UI patterns.
+   Use these directly in JSX: className="orbit-card"
+════════════════════════════════════════════════════════════ */
+
+@layer components {
+  /* ── Card ── */
+  .orbit-card {
+    background-color: var(--orbit-bg-card);
+    border: 0.5px solid var(--orbit-border);
+    border-radius: var(--radius-orbit-lg);
+    padding: 14px 16px;
+    transition:
+      border-color var(--duration-orbit-base) var(--ease-orbit-inout),
+      box-shadow var(--duration-orbit-slow) var(--ease-orbit-inout);
+  }
+  .orbit-card:hover {
+    border-color: var(--orbit-border-hover);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  /* ── Stat card (metric display) ── */
+  .orbit-stat-card {
+    background-color: var(--orbit-bg-card);
+    border: 0.5px solid var(--orbit-border);
+    border-radius: var(--radius-orbit-lg);
+    padding: 14px 16px;
+  }
+
+  /* ── Badge base ── */
+  .orbit-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 20px;
+    letter-spacing: 0.05em;
+  }
+
+  /* Badge variants */
+  .orbit-badge-brand {
+    background-color: var(--orbit-brand-bg);
+    color: var(--color-orbit-violet-300);
+  }
+  .orbit-badge-success {
+    background-color: var(--orbit-success-bg);
+    color: var(--orbit-success);
+  }
+  .orbit-badge-warning {
+    background-color: var(--orbit-warning-bg);
+    color: var(--orbit-warning);
+  }
+  .orbit-badge-danger {
+    background-color: var(--orbit-danger-bg);
+    color: var(--orbit-danger);
+  }
+  .orbit-badge-neutral {
+    background-color: var(--color-orbit-mist-900);
+    color: var(--color-orbit-mist-400);
+  }
+
+  /* ── Button — primary ── */
+  .orbit-btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background-color: var(--orbit-brand);
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 14px;
+    border-radius: var(--radius-orbit-md);
+    border: none;
+    cursor: pointer;
+    transition: opacity var(--duration-orbit-fast) var(--ease-orbit-out);
+  }
+  .orbit-btn-primary:hover {
+    opacity: 0.88;
+  }
+  .orbit-btn-primary:active {
+    transform: scale(0.98);
+    transition-duration: var(--duration-orbit-fast);
+  }
+
+  /* ── Button — ghost ── */
+  .orbit-btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background-color: var(--orbit-brand-bg);
+    color: var(--color-orbit-violet-300);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 8px 14px;
+    border-radius: var(--radius-orbit-md);
+    border: 0.5px solid var(--orbit-brand-border);
+    cursor: pointer;
+    transition: opacity var(--duration-orbit-fast) var(--ease-orbit-out);
+  }
+  .orbit-btn-ghost:hover {
+    opacity: 0.82;
+  }
+  .orbit-btn-ghost:active {
+    transform: scale(0.98);
+  }
+
+  /* ── Button — neutral / secondary ── */
+  .orbit-btn-neutral {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background-color: transparent;
+    color: var(--orbit-text-secondary);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 8px 14px;
+    border-radius: var(--radius-orbit-md);
+    border: 0.5px solid var(--orbit-border-hover);
+    cursor: pointer;
+    transition:
+      background-color var(--duration-orbit-fast) var(--ease-orbit-inout),
+      color var(--duration-orbit-fast) var(--ease-orbit-inout);
+  }
+  .orbit-btn-neutral:hover {
+    background-color: var(--color-orbit-mist-900);
+    color: var(--orbit-text-primary);
+  }
+
+  /* ── Icon button ── */
+  .orbit-icon-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-orbit-md);
+    background-color: var(--color-orbit-mist-900);
+    border: 0.5px solid var(--orbit-border);
+    color: var(--orbit-text-secondary);
+    cursor: pointer;
+    transition:
+      background-color var(--duration-orbit-fast) var(--ease-orbit-inout),
+      color var(--duration-orbit-fast) var(--ease-orbit-inout),
+      border-color var(--duration-orbit-fast) var(--ease-orbit-inout);
+  }
+  .orbit-icon-btn:hover {
+    background-color: var(--color-orbit-mist-800);
+    border-color: var(--orbit-border-hover);
+    color: var(--orbit-text-primary);
+  }
+
+  /* ── Nav item ── */
+  .orbit-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 7px 10px;
+    border-radius: var(--radius-orbit-md);
+    color: var(--color-orbit-mist-400);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition:
+      background-color var(--duration-orbit-fast) var(--ease-orbit-inout),
+      color var(--duration-orbit-fast) var(--ease-orbit-inout);
+  }
+  .orbit-nav-item:hover {
+    background-color: var(--color-orbit-mist-900);
+    color: var(--color-orbit-mist-200);
+  }
+  .orbit-nav-item.active {
+    background-color: var(--orbit-brand-bg);
+    color: var(--color-orbit-violet-300);
+  }
+
+  /* ── Progress track ── */
+  .orbit-progress-track {
+    height: 3px;
+    background-color: var(--color-orbit-mist-800);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .orbit-progress-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width var(--duration-orbit-slow) var(--ease-orbit-out);
+  }
+  .orbit-progress-fill-brand {
+    background-color: var(--orbit-brand);
+  }
+  .orbit-progress-fill-success {
+    background-color: var(--orbit-success);
+  }
+
+  /* ── Section divider ── */
+  .orbit-divider {
+    height: 0.5px;
+    background-color: var(--orbit-border);
+  }
+
+  /* ── Caption / eyebrow label ── */
+  .orbit-eyebrow {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--orbit-text-muted);
+  }
+
+  /* ── Avatar initials circle ── */
+  .orbit-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: var(--orbit-brand);
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  /* ── Circle icon container ── */
+  .orbit-circle-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-orbit-md);
+    flex-shrink: 0;
+  }
+  .orbit-circle-icon-brand {
+    background-color: var(--orbit-brand-bg);
+    color: var(--color-orbit-violet-300);
+  }
+  .orbit-circle-icon-success {
+    background-color: var(--orbit-success-bg);
+    color: var(--orbit-success);
+  }
+}
