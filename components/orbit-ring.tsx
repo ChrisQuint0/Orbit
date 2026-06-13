@@ -5,6 +5,7 @@ import {
   motion,
   AnimatePresence,
   useReducedMotion,
+  useInView,
 } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
 
@@ -58,7 +59,9 @@ function SvgCheck({ cx, cy }: { cx: number; cy: number }) {
 
 type Phase = "entering" | "idle" | "animating" | "complete";
 
-export function OrbitRing() {
+export function OrbitRing({ triggerOnScroll = false }: { triggerOnScroll?: boolean }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const inView = useInView(containerRef, { once: true, margin: "-100px" });
   const reduceMotion = useReducedMotion();
   const [selectedId, setSelectedId] = useState("jenny");
   const [contributedIds, setContributedIds] = useState<Set<string>>(new Set());
@@ -130,6 +133,9 @@ export function OrbitRing() {
 
   // Entrance sequence: draw ring → pop avatars → auto-play contribution
   useEffect(() => {
+    // If triggerOnScroll is active, wait until inView is true
+    if (triggerOnScroll && !inView) return;
+
     // After entrance animation finishes (ring draw + avatar pop = ~1.5s),
     // start the contribution animation
     const entranceT = setTimeout(() => {
@@ -138,8 +144,7 @@ export function OrbitRing() {
     timeoutsRef.current.push(entranceT);
 
     return () => clearAllTimeouts();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [runContributionAnimation, clearAllTimeouts, triggerOnScroll, inView]);
 
   const handleMemberClick = useCallback(
     (memberId: string) => {
@@ -155,6 +160,7 @@ export function OrbitRing() {
 
   return (
     <div
+      ref={containerRef}
       className="relative mx-auto aspect-square w-full max-w-[320px] sm:max-w-[420px] md:max-w-[520px]"
       aria-label="Interactive demonstration of an Orbit savings circle. Click a member to see how the pool fills."
     >
@@ -165,7 +171,7 @@ export function OrbitRing() {
       <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
+          animate={(!triggerOnScroll || inView) ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.9 }}
           transition={{ duration: 0.6, delay: 0.8, ease: [0.22, 1, 0.36, 1] }}
           className="pointer-events-auto orbit-card flex w-32 flex-col items-center gap-1 px-3 py-3 text-center sm:w-40 sm:gap-1.5 sm:px-4 sm:py-4"
         >
@@ -269,7 +275,7 @@ export function OrbitRing() {
           strokeWidth="1"
           strokeDasharray={`3 7`}
           initial={{ pathLength: 0, opacity: 0 }}
-          animate={{ pathLength: 1, opacity: 1 }}
+          animate={(!triggerOnScroll || inView) ? { pathLength: 1, opacity: 1 } : { pathLength: 0, opacity: 0 }}
           transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
         />
 
@@ -328,7 +334,7 @@ export function OrbitRing() {
             <motion.g
               key={member.id}
               initial={{ opacity: 0, scale: 0 }}
-              animate={{ opacity: 1, scale: 1 }}
+              animate={(!triggerOnScroll || inView) ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0 }}
               transition={{
                 duration: 0.5,
                 delay: 0.4 + index * 0.12,

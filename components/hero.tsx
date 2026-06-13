@@ -49,6 +49,7 @@ export function Hero() {
         </motion.div>
 
         <motion.div
+          className="hidden md:block"
           initial={{ opacity: 0, scale: 0.94 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{
