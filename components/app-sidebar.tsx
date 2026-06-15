@@ -40,11 +40,13 @@ const data = {
       title: "My Orbits",
       url: "#",
       icon: Telescope,
+      isActive: false,
     },
     {
       title: "Create Orbit",
       url: "#",
       icon: PlusCircle,
+      isActive: false,
     },
   ],
   navSecondary: [
@@ -52,16 +54,19 @@ const data = {
       title: "Orbit Score",
       url: "#",
       icon: Star,
+      isActive: false,
     },
     {
       title: "History",
       url: "#",
       icon: History,
+      isActive: false,
     },
     {
       title: "Settings",
       url: "#",
       icon: Settings,
+      isActive: false,
     },
   ]
 }
