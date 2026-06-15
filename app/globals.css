@@ -185,6 +185,16 @@
   --color-border: var(--orbit-border);
   --color-input: var(--orbit-border);
   --color-ring: var(--color-orbit-violet-500);
+
+  /* Sidebar */
+  --color-sidebar: var(--color-orbit-void-950);
+  --color-sidebar-foreground: var(--orbit-text-secondary);
+  --color-sidebar-primary: var(--orbit-brand);
+  --color-sidebar-primary-foreground: #ffffff;
+  --color-sidebar-accent: var(--color-orbit-mist-900);
+  --color-sidebar-accent-foreground: var(--orbit-text-primary);
+  --color-sidebar-border: transparent;
+  --color-sidebar-ring: var(--orbit-brand);
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -203,7 +213,7 @@
 
   /* Backgrounds */
   --orbit-bg-app: var(--color-orbit-void-900);
-  --orbit-bg-sidebar: var(--color-orbit-void-800);
+  --orbit-bg-sidebar: var(--color-orbit-void-950);
   --orbit-bg-card: var(--color-orbit-void-700);
   --orbit-bg-elevated: var(--color-orbit-void-500);
 

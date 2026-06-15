@@ -29,6 +29,33 @@ Traditional community savings circles (historically known as _paluwagan_ in the 
 - Framer Motion (Micro-animations)
 - Network: Stellar Testnet
 
+## Project Structure
+
+```text
+├── app/                  # Next.js App Router root
+│   ├── globals.css       # Global styles and Tailwind CSS configurations
+│   ├── icon.png          # App favicon / icon
+│   ├── layout.tsx        # Root layout configuration
+│   └── page.tsx          # Main landing page
+├── components/           # Reusable React components
+│   ├── ui/               # Shadcn UI primitives (button, card, input, label)
+│   ├── final-cta.tsx     # Final call-to-action section
+│   ├── footer.tsx        # Page footer component
+│   ├── hero-background.tsx # Interactive SVG background graphics
+│   ├── hero.tsx          # Landing page hero section
+│   ├── how-it-works.tsx  # Interactive step-by-step guide
+│   ├── navbar.tsx        # Header navigation bar
+│   ├── orbit-logo.tsx    # Branded SVG logo component
+│   ├── orbit-ring.tsx    # Interactive orbit rings illustration
+│   ├── orbit-score.tsx   # Trust score visual display
+│   ├── section-heading.tsx # Reusable section title component
+│   └── trust-section.tsx # Transparency and security features section
+├── lib/                  # Application utility helpers
+│   └── utils.ts          # Tailwind CSS classes merger helper
+├── public/               # Static assets (logos, svgs)
+└── tsconfig.json         # TypeScript configuration
+```
+
 ## Setup & Run
 
 Ensure you have [Node.js](https://nodejs.org) installed.
