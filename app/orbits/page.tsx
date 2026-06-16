@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import { Plus, Clock, CheckCircle2, ChevronRight, Wallet } from "lucide-react";
+import { CreateOrbitModal } from "@/components/create-orbit-modal";
 
 // Mock Data for UI presentation
 const ACTIVE_ORBITS = [
@@ -37,6 +39,8 @@ const COMPLETED_ORBITS = [
 ];
 
 export default function MyOrbitsPage() {
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
   return (
     <div className="min-h-screen bg-[var(--orbit-bg-app)] text-[var(--orbit-text-primary)] p-6 md:p-10 font-sans">
       <div className="mx-auto max-w-6xl">
@@ -48,7 +52,10 @@ export default function MyOrbitsPage() {
               Manage your active savings circles and track your progress.
             </p>
           </div>
-          <button className="orbit-btn-primary shrink-0 self-start sm:self-auto">
+          <button 
+            onClick={() => setIsCreateModalOpen(true)}
+            className="orbit-btn-primary shrink-0 self-start sm:self-auto"
+          >
             <Plus className="h-4 w-4" />
             Create Orbit
           </button>
@@ -131,7 +138,10 @@ export default function MyOrbitsPage() {
                 You are not part of any savings circles right now. Create a new
                 one to start saving with your crew.
               </p>
-              <button className="orbit-btn-ghost">
+              <button 
+                onClick={() => setIsCreateModalOpen(true)}
+                className="orbit-btn-ghost"
+              >
                 Create your first Orbit
               </button>
             </div>
@@ -179,6 +189,11 @@ export default function MyOrbitsPage() {
           )}
         </section>
       </div>
+
+      <CreateOrbitModal 
+        isOpen={isCreateModalOpen} 
+        onClose={() => setIsCreateModalOpen(false)} 
+      />
     </div>
   );
 }
