@@ -34,7 +34,7 @@ export function FinalCta() {
           </p>
           <div className="mt-8 flex flex-col items-center gap-3">
             <Link
-              href="/orbits/new"
+              href="/login"
               className={cn(buttonVariants({ variant: "primary", size: "lg" }))}
             >
               Create an Orbit

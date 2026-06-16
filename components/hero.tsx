@@ -36,7 +36,7 @@ export function Hero() {
 
           <div className="mt-8 flex flex-wrap items-center gap-3">
             <Link
-              href="/orbits/new"
+              href="/login"
               className={cn(buttonVariants({ variant: "primary", size: "lg" }))}
             >
               Start an Orbit

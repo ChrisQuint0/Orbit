@@ -30,13 +30,13 @@ export function Navbar() {
 
         <div className="flex items-center gap-3">
           <Link
-            href="/sign-in"
+            href="/login"
             className="hidden text-[13px] font-medium text-[var(--orbit-text-secondary)] transition-colors duration-orbit-base ease-orbit-inout hover:text-orbit-mist-50 sm:inline-block"
           >
             Sign In
           </Link>
           <Link
-            href="/orbits/new"
+            href="/login"
             className={cn(buttonVariants({ variant: "primary" }))}
           >
             Start an Orbit
