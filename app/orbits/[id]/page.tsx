@@ -12,7 +12,9 @@ import {
   ShieldCheck,
   Trophy,
   X,
+  ListOrdered,
 } from "lucide-react";
+import { EditReleaseOrderModal, CrewMember } from "@/components/edit-release-order-modal";
 
 export default function OrbitDetailPage({
   params,
@@ -30,11 +32,11 @@ export default function OrbitDetailPage({
     nextRelease: "Jenny",
     userDeposited: false,
     crew: [
-      { name: "Chris (You)", status: "Pending", avatar: "C" },
-      { name: "Jenny", status: "Deposited", avatar: "J" },
-      { name: "Mark", status: "Deposited", avatar: "M" },
-      { name: "Sarah", status: "Deposited", avatar: "S" },
-      { name: "David", status: "Pending", avatar: "D" },
+      { id: "c1", name: "Chris (You)", status: "Pending", avatar: "C" },
+      { id: "c2", name: "Jenny", status: "Deposited", avatar: "J" },
+      { id: "c3", name: "Mark", status: "Deposited", avatar: "M" },
+      { id: "c4", name: "Sarah", status: "Deposited", avatar: "S" },
+      { id: "c5", name: "David", status: "Pending", avatar: "D" },
     ],
     history: [
       { action: "Sarah deposited 100 USDC", time: "2 hours ago" },
@@ -64,16 +66,18 @@ export default function OrbitDetailPage({
     ],
   };
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
+  const [isEditOrderModalOpen, setIsEditOrderModalOpen] = useState(false);
+  const [crew, setCrew] = useState<CrewMember[]>(orbit.crew);
   const recentHistory = orbit.history.slice(0, 4);
 
   useEffect(() => {
-    if (isHistoryModalOpen) {
+    if (isHistoryModalOpen || isEditOrderModalOpen) {
       document.body.classList.add("overflow-hidden");
     } else {
       document.body.classList.remove("overflow-hidden");
     }
     return () => document.body.classList.remove("overflow-hidden");
-  }, [isHistoryModalOpen]);
+  }, [isHistoryModalOpen, isEditOrderModalOpen]);
 
   return (
     <div className="min-h-screen bg-[var(--orbit-bg-app)] text-[var(--orbit-text-primary)] p-6 md:p-10 font-sans pb-20">
@@ -101,8 +105,15 @@ export default function OrbitDetailPage({
               Secured by Soroban Smart Contract
             </p>
           </div>
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-3">
             <button className="orbit-btn-neutral">View Contract</button>
+            <button 
+              onClick={() => setIsEditOrderModalOpen(true)}
+              className="orbit-btn-neutral flex items-center gap-2"
+            >
+              <ListOrdered className="h-4 w-4" />
+              Edit Release Order
+            </button>
             <button className="orbit-btn-ghost">Invite Members</button>
           </div>
         </div>
@@ -204,7 +215,7 @@ export default function OrbitDetailPage({
               </div>
 
               <div className="space-y-4">
-                {orbit.crew.map((member, idx) => (
+                {crew.map((member, idx) => (
                   <div
                     key={idx}
                     className="flex items-center justify-between p-3 rounded-[var(--radius-orbit-md)] bg-[var(--orbit-bg-elevated)] border border-[var(--orbit-border)] hover:border-[var(--orbit-border-hover)] transition-colors"
@@ -347,6 +358,14 @@ export default function OrbitDetailPage({
           </div>
         </div>
       )}
+
+      {/* Edit Release Order Modal */}
+      <EditReleaseOrderModal
+        isOpen={isEditOrderModalOpen}
+        onClose={() => setIsEditOrderModalOpen(false)}
+        crew={crew}
+        onSave={setCrew}
+      />
     </div>
   );
 }
