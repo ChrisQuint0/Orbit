@@ -360,11 +360,10 @@ export function OrbitRing({ triggerOnScroll = false }: { triggerOnScroll?: boole
                 <motion.circle
                   cx={p.x}
                   cy={p.y}
-                  r={24}
                   fill="none"
                   stroke="var(--color-orbit-teal-400)"
                   strokeWidth="1.5"
-                  initial={{ opacity: 0.5 }}
+                  initial={{ opacity: 0.5, r: 24 }}
                   animate={{ opacity: [0.5, 0], r: [24, 36] }}
                   transition={{
                     duration: 2,
@@ -380,11 +379,10 @@ export function OrbitRing({ triggerOnScroll = false }: { triggerOnScroll?: boole
                   key={`hint-${member.id}`}
                   cx={p.x}
                   cy={p.y}
-                  r={24}
                   fill="none"
                   stroke="var(--color-orbit-violet-400)"
                   strokeWidth="1.5"
-                  initial={{ opacity: 0 }}
+                  initial={{ opacity: 0, r: 22 }}
                   animate={{ opacity: [0, 0.6, 0], r: [22, 30, 22] }}
                   transition={{
                     duration: 1.4,

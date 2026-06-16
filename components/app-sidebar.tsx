@@ -26,27 +26,18 @@ import {
   SidebarSeparator,
 } from "@/components/ui/sidebar"
 import Image from "next/image"
-
-// Use Telescope for My Orbits and PlusCircle for Create Orbit to add a bit of life.
+import { usePathname } from "next/navigation"
 const data = {
   navMain: [
     {
       title: "Dashboard",
       url: "/dashboard",
       icon: LayoutGrid,
-      isActive: true,
     },
     {
       title: "My Orbits",
-      url: "#",
+      url: "/orbits",
       icon: Telescope,
-      isActive: false,
-    },
-    {
-      title: "Create Orbit",
-      url: "#",
-      icon: PlusCircle,
-      isActive: false,
     },
   ],
   navSecondary: [
@@ -54,25 +45,23 @@ const data = {
       title: "Orbit Score",
       url: "#",
       icon: Star,
-      isActive: false,
     },
     {
       title: "History",
       url: "#",
       icon: History,
-      isActive: false,
     },
     {
       title: "Settings",
       url: "#",
       icon: Settings,
-      isActive: false,
     },
   ]
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { toggleSidebar, state } = useSidebar()
+  const pathname = usePathname()
   
   return (
     <Sidebar collapsible="icon" className="border-r-0" {...props}>
@@ -118,13 +107,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarGroupLabel className="text-[10px] uppercase tracking-widest text-orbit-text-muted mb-2 font-semibold group-data-[collapsible=icon]:hidden">Menu</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {data.navMain.map((item) => (
+              {data.navMain.map((item) => {
+                const isActive = item.url !== "#" && pathname.startsWith(item.url);
+                return (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton 
                     asChild 
-                    isActive={item.isActive} 
+                    isActive={isActive} 
                     tooltip={item.title}
-                    className={item.isActive 
+                    className={isActive 
                       ? "!bg-[var(--orbit-brand-bg)] !text-white hover:!bg-[var(--orbit-brand-bg)] hover:!text-white" 
                       : "!bg-transparent text-[var(--orbit-text-secondary)] hover:!text-white hover:!bg-white/5"}
                   >
@@ -134,7 +125,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     </a>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
-              ))}
+              )})}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -145,13 +136,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarGroupLabel className="text-[10px] uppercase tracking-widest text-orbit-text-muted mb-2 font-semibold group-data-[collapsible=icon]:hidden">Account</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {data.navSecondary.map((item) => (
+              {data.navSecondary.map((item) => {
+                const isActive = item.url !== "#" && pathname.startsWith(item.url);
+                return (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton 
                     asChild 
-                    isActive={item.isActive} 
+                    isActive={isActive} 
                     tooltip={item.title}
-                    className={item.isActive 
+                    className={isActive 
                       ? "!bg-[var(--orbit-brand-bg)] !text-white hover:!bg-[var(--orbit-brand-bg)] hover:!text-white" 
                       : "!bg-transparent text-[var(--orbit-text-secondary)] hover:!text-white hover:!bg-white/5"}
                   >
@@ -161,7 +154,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     </a>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
-              ))}
+              )})}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
