@@ -2,6 +2,9 @@
 
 import { useState } from "react";
 import { X, KeyRound, ArrowRight } from "lucide-react";
+import { joinOrbitAction } from "@/app/actions/orbit";
+import { supabase } from "@/lib/supabase";
+import { useRouter } from "next/navigation";
 
 interface JoinOrbitModalProps {
   isOpen: boolean;
@@ -11,17 +14,41 @@ interface JoinOrbitModalProps {
 export function JoinOrbitModal({ isOpen, onClose }: JoinOrbitModalProps) {
   const [inviteCode, setInviteCode] = useState("");
   const [isJoining, setIsJoining] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+  const router = useRouter();
 
   if (!isOpen) return null;
 
-  const handleJoin = (e: React.FormEvent) => {
+  const handleJoin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsJoining(true);
-    // Simulate join action
-    setTimeout(() => {
+    setErrorMsg("");
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        setErrorMsg("You must be logged in to join an orbit.");
+        setIsJoining(false);
+        return;
+      }
+
+      const res = await joinOrbitAction({
+        userId: user.id,
+        inviteCode: inviteCode,
+      });
+
+      if (!res.success) {
+        setErrorMsg(res.error || "Failed to join orbit.");
+      } else {
+        // Success
+        onClose();
+        router.refresh();
+      }
+    } catch (err: any) {
+      setErrorMsg(err.message || "Something went wrong.");
+    } finally {
       setIsJoining(false);
-      onClose();
-    }, 1000);
+    }
   };
 
   return (
@@ -38,8 +65,13 @@ export function JoinOrbitModal({ isOpen, onClose }: JoinOrbitModalProps) {
         </div>
 
         <form onSubmit={handleJoin} className="p-6">
+          {errorMsg && (
+            <div className="mb-4 p-3 rounded-lg bg-[var(--orbit-danger-bg)] border border-[var(--orbit-danger-border)] text-sm text-[var(--orbit-danger)]">
+              {errorMsg}
+            </div>
+          )}
           <p className="text-sm text-[var(--orbit-text-secondary)] mb-6">
-            Enter the invite code you received to join your crew's savings circle.
+            Enter the 6-character invite code you received to join your crew's savings circle.
           </p>
           <div className="flex flex-col gap-1.5 mb-6">
             <label className="text-sm font-medium text-[var(--orbit-text-secondary)]">Invite Code</label>

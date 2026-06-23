@@ -9,16 +9,17 @@ interface InviteMembersModalProps {
   orbitName: string;
   joinedMembers: number;
   totalMembers: number;
+  inviteCode?: string;
 }
 
-export function InviteMembersModal({ isOpen, onClose, orbitName, joinedMembers, totalMembers }: InviteMembersModalProps) {
+export function InviteMembersModal({ isOpen, onClose, orbitName, joinedMembers, totalMembers, inviteCode }: InviteMembersModalProps) {
   const [copied, setCopied] = useState(false);
-  const inviteLink = "https://orbit.finance/join/fc2a9x";
+  const displayCode = inviteCode || "------";
 
   if (!isOpen) return null;
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(inviteLink);
+    navigator.clipboard.writeText(displayCode);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -62,12 +63,12 @@ export function InviteMembersModal({ isOpen, onClose, orbitName, joinedMembers, 
           </div>
 
           <div className="flex flex-col gap-2 mb-6">
-            <label className="text-sm font-medium text-[var(--orbit-text-secondary)]">Invite Link</label>
+            <label className="text-sm font-medium text-[var(--orbit-text-secondary)]">Invite Code</label>
             <div className="flex gap-2">
-              <div className="flex-1 bg-[var(--orbit-bg-app)] border border-[var(--orbit-border)] rounded-xl py-2.5 px-4 text-sm text-[var(--orbit-text-primary)] font-mono overflow-hidden whitespace-nowrap text-ellipsis">
-                {inviteLink}
+              <div className="flex-1 bg-[var(--orbit-bg-app)] border border-[var(--orbit-border)] rounded-xl py-3 px-4 text-center text-xl tracking-[0.25em] text-[var(--orbit-brand-light)] font-mono font-bold overflow-hidden whitespace-nowrap text-ellipsis uppercase">
+                {displayCode}
               </div>
-              <button onClick={handleCopy} className="bg-[var(--orbit-bg-elevated)] hover:bg-[var(--orbit-brand-bg)] border border-[var(--orbit-border)] hover:border-[var(--orbit-brand-border)] text-white px-4 rounded-xl transition-colors flex items-center justify-center shrink-0">
+              <button onClick={handleCopy} className="bg-[var(--orbit-bg-elevated)] hover:bg-[var(--orbit-brand-bg)] border border-[var(--orbit-border)] hover:border-[var(--orbit-brand-border)] text-white px-5 rounded-xl transition-colors flex items-center justify-center shrink-0">
                 {copied ? <CheckCircle2 size={18} className="text-[var(--orbit-success)]" /> : <Copy size={18} />}
               </button>
             </div>

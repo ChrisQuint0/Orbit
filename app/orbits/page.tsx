@@ -1,11 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { Plus, Clock, CheckCircle2, ChevronRight, Wallet, Users, Link as LinkIcon, LogIn } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Plus, Clock, CheckCircle2, ChevronRight, Wallet, Users, Link as LinkIcon, LogIn, Trash2 } from "lucide-react";
+import { deleteOrbitAction } from "@/app/actions/orbit";
 import { CreateOrbitModal } from "@/components/create-orbit-modal";
 import { JoinOrbitModal } from "@/components/join-orbit-modal";
 import { InviteMembersModal } from "@/components/invite-members-modal";
+import { supabase } from "@/lib/supabase";
+import { useRouter } from "next/navigation";
 
 // Define the types for the Orbit states
 type OrbitLifecycleState = "FORMING" | "READY" | "ACTIVE" | "COMPLETED";
@@ -23,79 +26,175 @@ interface OrbitMockData {
   totalMembers: number;
   progress: string;
   isActionNeeded: boolean;
+  inviteCode?: string;
   completedDate?: string;
+  isCreator: boolean;
 }
 
-// Mock Data for UI presentation
-const ALL_ORBITS: OrbitMockData[] = [
-  {
-    id: "orb_1",
-    name: "Factory Crew Orbit",
-    pool: "500",
-    cycle: 3,
-    totalCycles: 5,
-    nextRelease: "Jenny",
-    state: "ACTIVE",
-    statusBadge: "Active",
-    membersJoined: 5,
-    totalMembers: 5,
-    progress: "4 of 5 Deposited",
-    isActionNeeded: false,
-  },
-  {
-    id: "orb_2",
-    name: "Weekend Fund",
-    pool: "0",
-    cycle: 1,
-    totalCycles: 5,
-    nextRelease: "TBD",
-    state: "FORMING",
-    statusBadge: "Waiting for Members",
-    membersJoined: 3,
-    totalMembers: 5,
-    progress: "Waiting for 2 more",
-    isActionNeeded: true,
-  },
-  {
-    id: "orb_3",
-    name: "Family Trip Savings",
-    pool: "0",
-    cycle: 1,
-    totalCycles: 10,
-    nextRelease: "Sarah",
-    state: "READY",
-    statusBadge: "Crew Complete",
-    membersJoined: 10,
-    totalMembers: 10,
-    progress: "Ready for Cycle 1",
-    isActionNeeded: false,
-  },
-  {
-    id: "orb_4",
-    name: "Q1 Tech Upgrade",
-    pool: "1000",
-    cycle: 4,
-    totalCycles: 4,
-    nextRelease: "You",
-    state: "COMPLETED",
-    statusBadge: "Completed",
-    membersJoined: 4,
-    totalMembers: 4,
-    progress: "All Cycles Done",
-    isActionNeeded: false,
-    completedDate: "Mar 15, 2026",
-  }
-];
-
 export default function MyOrbitsPage() {
+  const router = useRouter();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
-  const [inviteModalData, setInviteModalData] = useState<{ isOpen: boolean; orbitName: string; joined: number; total: number }>({
+  const [inviteModalData, setInviteModalData] = useState<{ isOpen: boolean; orbitName: string; joined: number; total: number; inviteCode: string }>({
     isOpen: false,
     orbitName: "",
     joined: 0,
     total: 0,
+    inviteCode: "",
   });
+
+  const [orbits, setOrbits] = useState<OrbitMockData[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const fetchOrbits = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        router.push("/auth");
+        return;
+      }
+
+      // 1. Fetch orbits the user belongs to
+      const { data: userMemberships, error: memberErr } = await supabase
+        .from("orbit_members")
+        .select("orbit_id, role")
+        .eq("user_id", user.id);
+
+      if (memberErr || !userMemberships || userMemberships.length === 0) {
+        setOrbits([]);
+        setIsLoading(false);
+        return;
+      }
+
+      const orbitIds = userMemberships.map(m => m.orbit_id);
+
+      // 2. Fetch full orbit details
+      const { data: orbitsData, error: orbitErr } = await supabase
+        .from("orbits")
+        .select("*")
+        .in("id", orbitIds);
+
+      if (orbitErr || !orbitsData) throw orbitErr;
+
+      // 3. Fetch members count for each orbit
+      // A simple way is to fetch all memberships for these orbits and group them
+      const { data: allMemberships, error: allMemberErr } = await supabase
+        .from("orbit_members")
+        .select("orbit_id")
+        .in("orbit_id", orbitIds);
+
+      if (allMemberErr) throw allMemberErr;
+
+      const memberCounts = allMemberships.reduce((acc: any, curr: any) => {
+        acc[curr.orbit_id] = (acc[curr.orbit_id] || 0) + 1;
+        return acc;
+      }, {});
+
+      // 4. Fetch all deposits to calculate progress
+      const activeOrbitIds = orbitsData.filter((o: any) => o.status === "ACTIVE").map((o: any) => o.id);
+      let allDeposits: any[] = [];
+      if (activeOrbitIds.length > 0) {
+        const { data: depositsData } = await supabase
+          .from("deposits")
+          .select("orbit_id, cycle_number, status")
+          .in("orbit_id", activeOrbitIds);
+        if (depositsData) allDeposits = depositsData;
+      }
+
+      // 5. Fetch member details with user names to resolve "nextRelease"
+      let memberDetails: any[] = [];
+      if (orbitIds.length > 0) {
+        const { data: md } = await supabase
+          .from("orbit_members")
+          .select("orbit_id, payout_order, users(full_name)")
+          .in("orbit_id", orbitIds);
+        if (md) memberDetails = md;
+      }
+
+      // 6. Map to UI format
+      const formattedOrbits: OrbitMockData[] = orbitsData.map((orbit) => {
+        const joined = memberCounts[orbit.id] || 0;
+        const total = orbit.num_members;
+        const pool = (Number(orbit.deposit_amount) * (total - 1)).toString();
+        const membership = userMemberships.find(m => m.orbit_id === orbit.id);
+        const isCreator = membership?.role === "CREATOR";
+        
+        // Find next release member
+        const nextMember = memberDetails.find(m => m.orbit_id === orbit.id && m.payout_order === orbit.current_cycle);
+        const nextRelease = orbit.status === "COMPLETED" ? "Done" : nextMember?.users?.full_name || "TBD";
+
+        // Count deposits for current cycle
+        const currentDeposits = allDeposits.filter(d => d.orbit_id === orbit.id && d.cycle_number === orbit.current_cycle && d.status === "PAID");
+        const numDeposited = currentDeposits.length;
+        const targetDeposits = total - 1;
+
+        let statusBadge = "Unknown";
+        let progress = "";
+        let isActionNeeded = false;
+        
+        if (orbit.status === "FORMING") {
+          statusBadge = "Waiting for Members";
+          progress = `Waiting for ${total - joined} more`;
+          if (isCreator && joined === total) isActionNeeded = true;
+        } else if (orbit.status === "READY") {
+          statusBadge = "Crew Complete";
+          progress = "Ready for Cycle 1";
+          if (isCreator) isActionNeeded = true;
+        } else if (orbit.status === "ACTIVE") {
+          statusBadge = "Active";
+          progress = `${numDeposited} of ${targetDeposits} Deposited`;
+          // Basic action needed check: hasn't deposited yet, and isn't the recipient
+          const isRecipient = membership?.payout_order === orbit.current_cycle;
+          const myDeposit = allDeposits.find(d => d.orbit_id === orbit.id && d.cycle_number === orbit.current_cycle && d.user_id === user.id);
+          if (!isRecipient && (!myDeposit || myDeposit.status !== "PAID")) {
+            isActionNeeded = true;
+          }
+        } else if (orbit.status === "COMPLETED") {
+          statusBadge = "Completed";
+          progress = "All Cycles Done";
+        }
+
+        return {
+          id: orbit.id,
+          name: orbit.name,
+          pool: pool,
+          cycle: orbit.current_cycle || 1,
+          totalCycles: total,
+          nextRelease: nextRelease,
+          state: orbit.status as OrbitLifecycleState,
+          statusBadge,
+          membersJoined: joined,
+          totalMembers: total,
+          progress,
+          isActionNeeded,
+          inviteCode: orbit.invite_code,
+          completedDate: orbit.status === "COMPLETED" ? new Date(orbit.created_at).toLocaleDateString() : undefined,
+          isCreator,
+        };
+      });
+
+      // Sort by creation or status
+      formattedOrbits.sort((a, b) => a.state === "COMPLETED" ? 1 : -1);
+
+      setOrbits(formattedOrbits);
+    } catch (err) {
+      console.error("Failed to load orbits:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("action") === "create") {
+      setIsCreateModalOpen(true);
+      window.history.replaceState({}, '', '/orbits');
+    } else if (params.get("action") === "join") {
+      setIsJoinModalOpen(true);
+      window.history.replaceState({}, '', '/orbits');
+    }
+    fetchOrbits();
+  }, [isCreateModalOpen, isJoinModalOpen]); // Refetch when modals close
 
   const openInviteModal = (e: React.MouseEvent, orbit: OrbitMockData) => {
     e.preventDefault(); // Prevent navigating to orbit details
@@ -104,17 +203,46 @@ export default function MyOrbitsPage() {
       orbitName: orbit.name,
       joined: orbit.membersJoined,
       total: orbit.totalMembers,
+      inviteCode: orbit.inviteCode || "",
     });
   };
 
-  // Filter orbits into active (forming, ready, active) and completed
-  const activeOrbits = ALL_ORBITS.filter((o) => o.state !== "COMPLETED");
-  const completedOrbits = ALL_ORBITS.filter((o) => o.state === "COMPLETED");
+  const handleDeleteOrbit = async (e: React.MouseEvent, orbitId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!window.confirm("Are you sure you want to delete this orbit? This action cannot be undone.")) return;
+    
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
 
-  const hasOrbits = ALL_ORBITS.length > 0;
+      const res = await deleteOrbitAction({ userId: user.id, orbitId });
+      if (res.success) {
+        fetchOrbits(); // Refresh the list
+      } else {
+        alert(res.error || "Failed to delete orbit");
+      }
+    } catch (err) {
+      console.error("Delete failed:", err);
+      alert("An error occurred while deleting the orbit.");
+    }
+  };
+
+  // Filter orbits into active (forming, ready, active) and completed
+  const activeOrbits = orbits.filter((o) => o.state !== "COMPLETED");
+  const completedOrbits = orbits.filter((o) => o.state === "COMPLETED");
+
+  const hasOrbits = orbits.length > 0;
+
+  if (isLoading) {
+    return <div className="min-h-screen bg-[var(--orbit-bg-app)] flex items-center justify-center p-10">
+      <div className="w-8 h-8 border-4 border-[var(--orbit-brand)] border-t-transparent rounded-full animate-spin"></div>
+    </div>;
+  }
 
   return (
-    <div className="min-h-screen bg-[var(--orbit-bg-app)] text-[var(--orbit-text-primary)] p-6 md:p-10 font-sans">
+    <div className="min-h-screen bg-[var(--orbit-bg-app)] text-[var(--orbit-text-primary)] p-6 md:p-10 font-sans relative">
       <div className="mx-auto max-w-6xl">
         
         {/* Page Header */}
@@ -146,7 +274,7 @@ export default function MyOrbitsPage() {
         {!hasOrbits ? (
           /* Empty State */
           <div className="flex flex-col items-center justify-center py-20 px-4">
-            <div className="w-24 h-24 rounded-full bg-[var(--orbit-bg-elevated)] flex items-center justify-center mb-6 shadow-inner">
+            <div className="w-24 h-24 rounded-full bg-[var(--orbit-bg-elevated)] flex items-center justify-center mb-6 shadow-inner border border-[var(--orbit-border)]">
               <Users className="text-[var(--orbit-text-muted)] w-12 h-12" />
             </div>
             <h2 className="text-2xl font-bold text-white mb-2">You haven't joined any Orbit yet.</h2>
@@ -177,12 +305,23 @@ export default function MyOrbitsPage() {
                       {orbit.state === "READY" && <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--orbit-success)]/5 rounded-full blur-3xl pointer-events-none -mr-10 -mt-10"></div>}
 
                       <div className="flex justify-between items-start mb-4">
-                        <h3 className="font-semibold text-lg text-white group-hover:text-[var(--orbit-brand-light)] transition-colors">
+                        <h3 className="font-semibold text-lg text-white group-hover:text-[var(--orbit-brand-light)] transition-colors pr-2">
                           {orbit.name}
                         </h3>
-                        <span className={`orbit-badge ${orbit.state === 'ACTIVE' ? 'orbit-badge-brand' : orbit.state === 'READY' ? 'orbit-badge-success' : 'orbit-badge-warning'}`}>
-                          {orbit.statusBadge}
-                        </span>
+                        <div className="flex gap-2 items-center">
+                          {orbit.isCreator && orbit.state === "FORMING" && (
+                            <button 
+                              onClick={(e) => handleDeleteOrbit(e, orbit.id)}
+                              className="p-1.5 rounded-md hover:bg-[var(--orbit-danger-bg)] text-[var(--orbit-text-secondary)] hover:text-[var(--orbit-danger)] transition-colors"
+                              title="Delete Orbit"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          )}
+                          <span className={`orbit-badge ${orbit.state === 'ACTIVE' ? 'orbit-badge-brand' : orbit.state === 'READY' ? 'orbit-badge-success' : 'orbit-badge-warning'}`}>
+                            {orbit.statusBadge}
+                          </span>
+                        </div>
                       </div>
 
                       <div className="mb-6 flex-grow flex flex-col gap-4">
@@ -294,7 +433,7 @@ export default function MyOrbitsPage() {
                       key={orbit.id}
                       className="block group opacity-80 hover:opacity-100 transition-opacity"
                     >
-                      <div className="orbit-card bg-[var(--orbit-bg-sidebar)] h-full flex flex-col">
+                      <div className="orbit-card bg-[var(--orbit-bg-sidebar)] h-full flex flex-col border-[var(--orbit-border)] border">
                         <div className="flex justify-between items-center mb-4">
                           <h3 className="font-semibold text-white group-hover:text-[var(--orbit-brand-light)] transition-colors">
                             {orbit.name}
@@ -337,6 +476,7 @@ export default function MyOrbitsPage() {
         orbitName={inviteModalData.orbitName}
         joinedMembers={inviteModalData.joined}
         totalMembers={inviteModalData.total}
+        inviteCode={inviteModalData.inviteCode}
       />
     </div>
   );

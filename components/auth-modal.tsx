@@ -26,6 +26,43 @@ export function AuthModal() {
     router.replace("/");
   };
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey) {
+        switch (e.key) {
+          case "1":
+            e.preventDefault();
+            setEmail("cquinto.primary@gmail.com");
+            setPassword("Pass1234");
+            break;
+          case "2":
+            e.preventDefault();
+            setEmail("quinto_christopher@plpasig.edu.ph");
+            setPassword("Pass1234");
+            break;
+          case "3":
+            e.preventDefault();
+            setEmail("turing_alan@gmail.com");
+            setPassword("Pass1234");
+            break;
+          case "4":
+            e.preventDefault();
+            setEmail("lovelace_ada@gmail.com");
+            setPassword("Pass1234");
+            break;
+          case "5":
+            e.preventDefault();
+            setEmail("delacruz_juan@gmail.com");
+            setPassword("Pass1234");
+            break;
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);

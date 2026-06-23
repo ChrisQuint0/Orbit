@@ -8,7 +8,7 @@ const server = new StellarSdk.Horizon.Server("https://horizon-testnet.stellar.or
 const networkPassphrase = StellarSdk.Networks.TESTNET;
 
 // Testnet USDC Issuer
-const USDC_ISSUER = "GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN";
+const USDC_ISSUER = process.env.NEXT_PUBLIC_ORBIT_USDC_ISSUER || "GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN";
 
 // Encryption secret for wallet private keys (In production, use a robust key management service)
 const WALLET_ENCRYPTION_KEY = process.env.WALLET_ENCRYPTION_KEY || "orbit-dev-super-secret-key-12345";
@@ -96,6 +96,89 @@ export async function setupUserWallet(userId: string) {
     return { success: true, publicKey };
   } catch (error: any) {
     console.error("[Stellar] Wallet setup failed:", error);
+    return { success: false, error: error.message };
+  }
+}
+
+export async function addFundsToWallet(userId: string, amount: number) {
+  try {
+    const supabaseAdminUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
+    const supabase = createClient(supabaseAdminUrl, supabaseServiceKey);
+
+    // 1. Get current balance and public key
+    const { data: user, error: fetchError } = await supabase
+      .from("users")
+      .select("wallet_balance, stellar_wallet_pubkey")
+      .eq("id", userId)
+      .single();
+
+    if (fetchError || !user) throw new Error("Failed to fetch user balance");
+    if (!user.stellar_wallet_pubkey) throw new Error("User does not have a Stellar wallet");
+
+    const currentBalance = Number(user.wallet_balance) || 0;
+    const newBalance = currentBalance + amount;
+
+    // 2. Perform On-Chain Payment
+    const treasurySecret = process.env.ORBIT_TREASURY_SECRET;
+    if (!treasurySecret) throw new Error("Treasury secret not configured in .env.local");
+
+    const treasuryKeypair = StellarSdk.Keypair.fromSecret(treasurySecret);
+    const treasuryAccount = await server.loadAccount(treasuryKeypair.publicKey());
+    
+    const asset = new StellarSdk.Asset("USDC", USDC_ISSUER);
+
+    const tx = new StellarSdk.TransactionBuilder(treasuryAccount, {
+      fee: StellarSdk.BASE_FEE,
+      networkPassphrase,
+    })
+      .addOperation(
+        StellarSdk.Operation.payment({
+          destination: user.stellar_wallet_pubkey,
+          asset: asset,
+          amount: amount.toString(),
+        })
+      )
+      .setTimeout(180)
+      .build();
+
+    tx.sign(treasuryKeypair);
+    
+    console.log(`[Stellar] Sending ${amount} USDC to ${user.stellar_wallet_pubkey}...`);
+    const txResponse = await server.submitTransaction(tx);
+    console.log(`[Stellar] Payment successful! Hash: ${txResponse.hash}`);
+
+    // 3. Update DB balance
+    const { error: updateError } = await supabase
+      .from("users")
+      .update({ wallet_balance: newBalance })
+      .eq("id", userId);
+
+    if (updateError) throw new Error("Failed to update user balance in DB");
+
+    // 4. Log to Activity Feed
+    await supabase.from("activity_feed").insert({
+      user_id: userId,
+      action_type: "DEPOSIT",
+      message: `Topped up wallet with ${amount} USDC`,
+      stellar_tx_hash: txResponse.hash,
+    });
+
+    // 5. Log to Transactions Ledger
+    await supabase.from("transactions").insert({
+      user_id: userId,
+      type: "WALLET_FUNDING",
+      amount: amount,
+      currency: "USDC",
+      sender_address: treasuryKeypair.publicKey(),
+      recipient_address: user.stellar_wallet_pubkey,
+      status: "COMPLETED",
+      stellar_tx_hash: txResponse.hash,
+    });
+
+    return { success: true, newBalance, hash: txResponse.hash };
+  } catch (error: any) {
+    console.error("[Stellar] Add funds failed:", error);
     return { success: false, error: error.message };
   }
 }

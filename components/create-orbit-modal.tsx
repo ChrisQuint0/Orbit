@@ -2,6 +2,9 @@
 
 import { useState } from "react";
 import { X, Calendar, Users, CircleDollarSign, Clock, Tag, ArrowRight, ArrowLeft } from "lucide-react";
+import { createOrbitAction } from "@/app/actions/orbit";
+import { supabase } from "@/lib/supabase";
+import { useRouter } from "next/navigation";
 
 interface CreateOrbitModalProps {
   isOpen: boolean;
@@ -16,6 +19,8 @@ export function CreateOrbitModal({ isOpen, onClose }: CreateOrbitModalProps) {
   const [frequency, setFrequency] = useState("Weekly");
   const [startDate, setStartDate] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+  const router = useRouter();
 
   if (!isOpen) return null;
 
@@ -24,13 +29,37 @@ export function CreateOrbitModal({ isOpen, onClose }: CreateOrbitModalProps) {
     setStep("summary");
   };
 
-  const handleCreate = () => {
+  const handleCreate = async () => {
     setIsSubmitting(true);
-    // Simulate network request
-    setTimeout(() => {
+    setErrorMsg("");
+    
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        setErrorMsg("You must be logged in to create an orbit.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      const res = await createOrbitAction({
+        userId: user.id,
+        name: orbitName,
+        depositAmount: Number(depositAmount),
+        numMembers: Number(crewMembers),
+        frequency: frequency,
+        startDate: startDate,
+      });
+
+      if (!res.success) {
+        setErrorMsg(res.error || "Failed to create orbit.");
+      } else {
+        setStep("success");
+      }
+    } catch (err: any) {
+      setErrorMsg(err.message || "Something went wrong.");
+    } finally {
       setIsSubmitting(false);
-      setStep("success");
-    }, 1000);
+    }
   };
 
   const handleClose = () => {
@@ -44,6 +73,8 @@ export function CreateOrbitModal({ isOpen, onClose }: CreateOrbitModalProps) {
       setStartDate("");
     }, 200);
     onClose();
+    // Refresh the router if we are on the orbits page
+    router.refresh();
   };
 
   const totalPool = (Number(depositAmount) * Number(crewMembers)) || 0;
@@ -135,6 +166,11 @@ export function CreateOrbitModal({ isOpen, onClose }: CreateOrbitModalProps) {
         {step === "summary" && (
           <div className="p-6">
             <div className="bg-[var(--orbit-bg-app)] border border-[var(--orbit-border)] rounded-xl p-5 mb-6">
+              {errorMsg && (
+                <div className="mb-4 p-3 rounded-lg bg-[var(--orbit-danger-bg)] border border-[var(--orbit-danger-border)] text-sm text-[var(--orbit-danger)]">
+                  {errorMsg}
+                </div>
+              )}
               <div className="flex flex-col gap-4">
                 <div className="flex justify-between items-center border-b border-[var(--orbit-border)] pb-3">
                   <span className="text-sm text-[var(--orbit-text-secondary)]">Orbit Name</span>

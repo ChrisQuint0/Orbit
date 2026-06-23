@@ -16,6 +16,7 @@ interface EditReleaseOrderModalProps {
   onClose: () => void;
   crew: CrewMember[];
   onSave: (newCrew: CrewMember[]) => void;
+  isReadOnly?: boolean;
 }
 
 export function EditReleaseOrderModal({
@@ -23,6 +24,7 @@ export function EditReleaseOrderModal({
   onClose,
   crew,
   onSave,
+  isReadOnly = false,
 }: EditReleaseOrderModalProps) {
   const [items, setItems] = useState<CrewMember[]>(crew);
 
@@ -54,10 +56,10 @@ export function EditReleaseOrderModal({
         <div className="flex items-center justify-between border-b border-[var(--orbit-border)] px-6 py-4 bg-[var(--orbit-bg-card)] z-10 shrink-0">
           <div>
             <h2 className="text-lg font-semibold text-[var(--orbit-text-primary)]">
-              Edit Release Order
+              {isReadOnly ? "Release Order" : "Edit Release Order"}
             </h2>
             <p className="text-sm text-[var(--orbit-text-secondary)]">
-              Drag to reorder the crew members.
+              {isReadOnly ? "The orbit has started. The order is locked." : "Drag to reorder the crew members."}
             </p>
           </div>
           <button
@@ -70,30 +72,51 @@ export function EditReleaseOrderModal({
 
         {/* List Body */}
         <div className="p-6 overflow-y-auto flex-1">
-          <Reorder.Group axis="y" values={items} onReorder={setItems} className="space-y-3">
-            {items.map((member, idx) => (
-              <Reorder.Item
-                key={member.id}
-                value={member}
-                className="flex items-center gap-3 p-3 rounded-[var(--radius-orbit-md)] bg-[var(--orbit-bg-elevated)] border border-[var(--orbit-border)] hover:border-[var(--orbit-brand)]/50 transition-colors cursor-grab active:cursor-grabbing select-none"
-              >
-                <div className="text-[var(--orbit-text-muted)] p-1 -ml-1 hover:text-white cursor-grab">
-                  <GripVertical className="h-4 w-4" />
+          {isReadOnly ? (
+            <div className="space-y-3">
+              {items.map((member, idx) => (
+                <div
+                  key={member.id}
+                  className="flex items-center gap-3 p-3 rounded-[var(--radius-orbit-md)] bg-[var(--orbit-bg-elevated)] border border-[var(--orbit-border)]"
+                >
+                  <div className="flex items-center gap-3 flex-1">
+                    <div className="orbit-avatar">{member.avatar}</div>
+                    <span className="font-medium text-sm text-[var(--orbit-text-primary)] flex-1 truncate">
+                      {member.name}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-center w-6 h-6 rounded bg-[var(--orbit-bg-app)] border border-[var(--orbit-border)] text-xs font-medium text-[var(--orbit-text-secondary)]">
+                    {idx + 1}
+                  </div>
                 </div>
-                
-                <div className="flex items-center gap-3 flex-1">
-                  <div className="orbit-avatar">{member.avatar}</div>
-                  <span className="font-medium text-sm text-[var(--orbit-text-primary)] flex-1 truncate">
-                    {member.name}
-                  </span>
-                </div>
+              ))}
+            </div>
+          ) : (
+            <Reorder.Group axis="y" values={items} onReorder={setItems} className="space-y-3">
+              {items.map((member, idx) => (
+                <Reorder.Item
+                  key={member.id}
+                  value={member}
+                  className="flex items-center gap-3 p-3 rounded-[var(--radius-orbit-md)] bg-[var(--orbit-bg-elevated)] border border-[var(--orbit-border)] hover:border-[var(--orbit-brand)]/50 transition-colors cursor-grab active:cursor-grabbing select-none"
+                >
+                  <div className="text-[var(--orbit-text-muted)] p-1 -ml-1 hover:text-white cursor-grab">
+                    <GripVertical className="h-4 w-4" />
+                  </div>
+                  
+                  <div className="flex items-center gap-3 flex-1">
+                    <div className="orbit-avatar">{member.avatar}</div>
+                    <span className="font-medium text-sm text-[var(--orbit-text-primary)] flex-1 truncate">
+                      {member.name}
+                    </span>
+                  </div>
 
-                <div className="flex items-center justify-center w-6 h-6 rounded bg-[var(--orbit-bg-app)] border border-[var(--orbit-border)] text-xs font-medium text-[var(--orbit-text-secondary)]">
-                  {idx + 1}
-                </div>
-              </Reorder.Item>
-            ))}
-          </Reorder.Group>
+                  <div className="flex items-center justify-center w-6 h-6 rounded bg-[var(--orbit-bg-app)] border border-[var(--orbit-border)] text-xs font-medium text-[var(--orbit-text-secondary)]">
+                    {idx + 1}
+                  </div>
+                </Reorder.Item>
+              ))}
+            </Reorder.Group>
+          )}
         </div>
 
         {/* Footer Actions */}
@@ -103,15 +126,17 @@ export function EditReleaseOrderModal({
             onClick={onClose}
             className="orbit-btn-neutral px-5"
           >
-            Cancel
+            {isReadOnly ? "Close" : "Cancel"}
           </button>
-          <button
-            type="button"
-            onClick={handleSave}
-            className="orbit-btn-primary px-6 shadow-[0_4px_14px_rgba(124,110,247,0.3)]"
-          >
-            Save Order
-          </button>
+          {!isReadOnly && (
+            <button
+              type="button"
+              onClick={handleSave}
+              className="orbit-btn-primary px-6 shadow-[0_4px_14px_rgba(124,110,247,0.3)]"
+            >
+              Save Order
+            </button>
+          )}
         </div>
       </div>
     </div>

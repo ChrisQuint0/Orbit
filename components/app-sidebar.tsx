@@ -41,6 +41,11 @@ const data = {
       url: "/orbits",
       icon: Telescope,
     },
+    {
+      title: "Transactions",
+      url: "/transactions",
+      icon: History,
+    },
   ],
   navSecondary: [
     {
