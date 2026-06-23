@@ -255,7 +255,7 @@ export default function MyOrbitsPage() {
           <div className="flex gap-3">
             <button 
               onClick={() => setIsJoinModalOpen(true)}
-              className="orbit-btn-secondary shrink-0 self-start sm:self-auto hidden sm:flex items-center gap-2 rounded-lg"
+              className="orbit-btn-secondary shrink-0 self-start sm:self-auto flex items-center gap-2 rounded-lg"
             >
               <LogIn className="h-4 w-4" />
               Join Orbit

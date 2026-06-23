@@ -22,14 +22,19 @@ export function AuthModal() {
   const [errorMsg, setErrorMsg] = useState("");
 
   // Toast developer / demo states
-  const [showToast, setShowToast] = useState(true);
+  const [showToast, setShowToast] = useState(false);
   const [copiedEmail, setCopiedEmail] = useState(false);
   const [copiedPassword, setCopiedPassword] = useState(false);
 
   // Reset toast state when modal opens
   useEffect(() => {
     if (isOpen) {
-      setShowToast(true);
+      const timer = setTimeout(() => {
+        setShowToast(true);
+      }, 1000);
+      return () => clearTimeout(timer);
+    } else {
+      setShowToast(false);
     }
   }, [isOpen]);
 
@@ -280,7 +285,7 @@ export function AuthModal() {
 
       {/* Persistent Demo Credentials Toast on Left Side */}
       {showToast && (
-        <div className="fixed top-6 left-6 z-[110] w-96 bg-gradient-to-b from-[var(--color-orbit-void-600)] to-[var(--color-orbit-void-700)] border border-[var(--orbit-border-strong)] rounded-2xl shadow-2xl p-6 animate-in slide-in-from-left-5 fade-in duration-300 select-none">
+        <div className="fixed top-4 left-4 right-4 sm:top-6 sm:left-6 sm:right-auto z-[110] w-auto sm:w-96 bg-gradient-to-b from-[var(--color-orbit-void-600)] to-[var(--color-orbit-void-700)] border border-[var(--orbit-border-strong)] rounded-2xl shadow-2xl p-5 sm:p-6 select-none" style={{ animation: 'overlay-enter 1s ease-out forwards' }}>
           <button 
             type="button"
             onClick={() => setShowToast(false)}
@@ -299,7 +304,7 @@ export function AuthModal() {
           <div className="text-sm text-[var(--orbit-text-secondary)] leading-relaxed mb-5 flex items-start gap-2.5">
             <Terminal className="w-4.5 h-4.5 text-[var(--orbit-brand-light)] shrink-0 mt-0.5" />
             <span>
-              <span className="text-white font-semibold">Instant Access:</span> Press <kbd className="bg-[var(--orbit-bg-app)] border border-[var(--orbit-border)] px-2 py-0.5 rounded text-[var(--orbit-brand-light)] font-mono text-xs font-bold">Ctrl + 1</kbd> to automatically pre-fill the form with a verified sandbox profile.
+              <span className="text-white font-semibold">Demo Account:</span> Use these credentials to explore the app without creating your own account. <span className="hidden sm:inline">Press <kbd className="bg-[var(--orbit-bg-app)] border border-[var(--orbit-border)] px-2 py-0.5 rounded text-[var(--orbit-brand-light)] font-mono text-xs font-bold">Ctrl + 1</kbd> to auto-fill the form.</span>
             </span>
           </div>
 
