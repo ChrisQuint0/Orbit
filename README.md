@@ -6,6 +6,8 @@ Community saving, reimagined.
 
 Traditional community savings circles (historically known as _paluwagan_ in the Philippines or _tandas_ globally) are vital tools for informal financial security and collaborative savings. However, they rely entirely on manual record-keeping and absolute trust. This makes them highly vulnerable to default, lack of transparency, administrative errors, and theft, with no security or automated recourse for participants. This matters because a large portion of the Philippine population remains unbanked or underbanked, relying heavily on these informal systems for financial liquidity.
 
+![Orbit Preview](./public/preview.png)
+
 ## How It Works
 
 1. **Create an Orbit**: A user starts a saving circle (an "Orbit"), sets the recurring deposit amount, cycle frequency, and invites their saving group ("Crew").
@@ -31,7 +33,7 @@ Track 2 — Financial Inclusion & Everyday Payments
 
 ## Setup & Run
 
-Check it out on: orbit-cq.vercel.app
+Check it out on: [orbit-cq.vercel.app](https://orbit-cq.vercel.app)
 
 Ensure you have Node.js installed.
 
