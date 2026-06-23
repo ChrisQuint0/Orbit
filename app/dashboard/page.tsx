@@ -6,6 +6,7 @@ import { ArrowRight, PlusCircle, Users, Wallet, CheckCircle2, ChevronRight, X, A
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import { addFundsToWallet } from "@/app/actions/wallet";
+import { OrbitLoader } from "@/components/orbit-loader";
 
 export default function Dashboard() {
   const router = useRouter();
@@ -149,11 +150,7 @@ export default function Dashboard() {
   }, [router]);
 
   if (isPageLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[50vh]">
-        <Loader2 className="h-8 w-8 animate-spin text-[var(--orbit-brand)]" />
-      </div>
-    );
+    return <OrbitLoader text="Syncing Dashboard Workspace..." />;
   }
 
   const formatTimeAgo = (dateStr: string) => {
@@ -201,7 +198,7 @@ export default function Dashboard() {
 
     const res = await addFundsToWallet(profile.id, fundingAmount);
     if (res.success) {
-      setWalletBalance(res.newBalance);
+      setWalletBalance(res.newBalance ?? 0);
       setFundingStep("success");
     } else {
       alert("Failed to add funds. Please try again.");
@@ -219,241 +216,310 @@ export default function Dashboard() {
   return (
     <div className="flex flex-col gap-8 p-6 md:p-8 lg:p-10 max-w-6xl mx-auto w-full relative">
       
-      {/* Guidance Banner */}
+      {/* ── Guidance Banner ── */}
       {walletBalance === 0 ? (
-        <div className="bg-gradient-to-r from-[var(--orbit-brand)]/20 to-[var(--orbit-brand)]/5 border border-[var(--orbit-brand)]/30 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between shadow-lg gap-4">
-          <div className="flex items-center gap-3">
-            <AlertCircle className="text-[var(--orbit-brand-light)] shrink-0" size={24} />
-            <div>
-              <h3 className="text-sm font-semibold text-white">Your wallet is ready.</h3>
-              <p className="text-xs text-[var(--orbit-text-secondary)] mt-0.5">Add funds to start contributing.</p>
+        <div 
+          className="relative rounded-xl p-[1px] overflow-hidden"
+          style={{ background: 'linear-gradient(135deg, var(--color-orbit-violet-600), var(--color-orbit-violet-900), var(--color-orbit-void-700))' }}
+        >
+          <div className="bg-[var(--orbit-bg-card)] rounded-[11px] p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+            style={{ animation: 'fade-in-up 0.5s ease-out forwards' }}
+          >
+            <div className="flex items-center gap-3.5">
+              <div className="w-10 h-10 rounded-full bg-[var(--orbit-brand-bg)] flex items-center justify-center shrink-0 ring-1 ring-[var(--orbit-brand-border)]" style={{ boxShadow: '0 0 16px rgba(124, 110, 247, 0.2)' }}>
+                <AlertCircle className="text-[var(--orbit-brand-light)]" size={20} />
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-white">Your wallet is ready.</h3>
+                <p className="text-xs text-[var(--orbit-text-secondary)] mt-0.5">Add funds to start contributing to savings circles.</p>
+              </div>
             </div>
+            <button onClick={openFundingModal} className="orbit-btn-primary px-5 py-2.5 text-sm shrink-0 rounded-lg shadow-lg shadow-[var(--orbit-brand)]/20 hover:shadow-[var(--orbit-brand)]/30 transition-shadow">
+              Add Funds
+              <ArrowRight size={14} />
+            </button>
           </div>
-          <button onClick={openFundingModal} className="orbit-btn-primary px-5 py-2 text-sm shrink-0">Add Funds</button>
         </div>
       ) : activeOrbits === 0 ? (
-        <div className="bg-gradient-to-r from-[var(--orbit-success)]/20 to-[var(--orbit-success)]/5 border border-[var(--orbit-success)]/30 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between shadow-lg gap-4">
-          <div className="flex items-center gap-3">
-            <CheckCircle2 className="text-[var(--orbit-success)] shrink-0" size={24} />
-            <div>
-              <h3 className="text-sm font-semibold text-white">You are ready to start saving with others.</h3>
-              <p className="text-xs text-[var(--orbit-text-secondary)] mt-0.5">Create or join an Orbit.</p>
+        <div 
+          className="relative rounded-xl p-[1px] overflow-hidden"
+          style={{ background: 'linear-gradient(135deg, var(--color-orbit-teal-600), var(--color-orbit-teal-900), var(--color-orbit-void-700))' }}
+        >
+          <div className="bg-[var(--orbit-bg-card)] rounded-[11px] p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+            style={{ animation: 'fade-in-up 0.5s ease-out forwards' }}
+          >
+            <div className="flex items-center gap-3.5">
+              <div className="w-10 h-10 rounded-full bg-[var(--orbit-success-bg)] flex items-center justify-center shrink-0 ring-1 ring-[var(--orbit-success-border)]" style={{ boxShadow: '0 0 16px rgba(90, 206, 167, 0.15)' }}>
+                <CheckCircle2 className="text-[var(--orbit-success)]" size={20} />
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-white">You are ready to start saving with others.</h3>
+                <p className="text-xs text-[var(--orbit-text-secondary)] mt-0.5">Create or join an Orbit.</p>
+              </div>
             </div>
-          </div>
-          <div className="flex gap-2 shrink-0">
-            <button className="orbit-btn-primary px-4 py-2 text-sm">Create Orbit</button>
-            <button className="orbit-btn-secondary px-4 py-2 text-sm">Join Orbit</button>
+            <div className="flex gap-2.5 shrink-0">
+              <button onClick={() => router.push("/orbits?action=create")} className="orbit-btn-primary px-4 py-2.5 text-sm rounded-lg shadow-lg shadow-[var(--orbit-brand)]/20">Create Orbit</button>
+              <button onClick={() => router.push("/orbits?action=join")} className="orbit-btn-secondary px-4 py-2.5 text-sm rounded-lg">Join Orbit</button>
+            </div>
           </div>
         </div>
       ) : null}
 
-      {/* Greeting */}
-      <div className="flex flex-col gap-1">
-        <h1 className="text-sm font-medium text-[var(--orbit-text-secondary)]">
+      {/* ── Greeting ── */}
+      <div className="flex flex-col gap-1" style={{ animation: 'fade-in-up 0.4s ease-out forwards' }}>
+        <p className="text-sm font-medium text-[var(--orbit-text-secondary)] tracking-wide">
           {getGreeting()}
-        </h1>
-        <h2 className="text-3xl sm:text-4xl leading-tight font-bold bg-gradient-to-r from-white via-white to-white/60 bg-clip-text text-transparent">
+        </p>
+        <h1 className="text-3xl sm:text-4xl leading-tight font-bold orbit-gradient-text">
           {profile?.full_name ? profile.full_name.split(' ')[0] : 'Member'}
-        </h2>
+        </h1>
+        <p className="text-sm text-[var(--orbit-text-muted)] mt-0.5">Here's your savings overview.</p>
       </div>
 
-      {/* Stats Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
-        {/* Wallet Balance (Most Important) */}
-        <div className="orbit-stat-card group relative overflow-hidden transition-all hover:-translate-y-1 hover:shadow-lg border-[var(--orbit-brand-border)] bg-gradient-to-br from-[var(--orbit-brand-bg)] to-[var(--orbit-bg-card)] ring-1 ring-[var(--orbit-brand)]/30 flex flex-col justify-between min-h-[140px]">
-          <div className="absolute inset-0 bg-gradient-to-tl from-[var(--orbit-brand)]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-          <div className="relative z-10">
-            <div className="text-xs font-semibold uppercase tracking-wider text-[var(--orbit-brand-light)] mb-2 flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-[var(--orbit-brand-light)] animate-pulse shadow-[0_0_8px_var(--orbit-brand-light)]"></span>
+      {/* ── Stats Row ── */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-5" style={{ animation: 'fade-in-up 0.5s ease-out forwards', animationDelay: '0.05s', animationFillMode: 'backwards' }}>
+        
+        {/* Wallet Balance — primary stat */}
+        <div className="orbit-shimmer group relative overflow-hidden rounded-xl transition-all duration-300 hover:-translate-y-1 flex flex-col justify-between min-h-[148px] border border-[var(--orbit-brand-border)] bg-gradient-to-br from-[var(--orbit-brand-bg)] via-[var(--orbit-bg-card)] to-[var(--orbit-bg-card)]" style={{ animation: 'glow-pulse 4s ease-in-out infinite' }}>
+          {/* Accent top bar */}
+          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[var(--color-orbit-violet-500)] via-[var(--color-orbit-violet-400)] to-transparent" />
+          {/* Glow orb */}
+          <div className="absolute -top-12 -right-12 w-32 h-32 bg-[var(--orbit-brand)]/10 rounded-full blur-3xl pointer-events-none group-hover:bg-[var(--orbit-brand)]/20 transition-colors duration-700" />
+          
+          <div className="relative z-10 p-5 pb-0">
+            <div className="text-[11px] font-semibold uppercase tracking-wider text-[var(--orbit-brand-light)] mb-3 flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-[var(--orbit-brand-light)] animate-pulse shadow-[0_0_8px_var(--orbit-brand-light)]" />
               Wallet Balance
             </div>
-            <div className="flex items-baseline gap-1.5 mt-1">
-              <span className="text-4xl font-bold tracking-tight text-white">{walletBalance.toLocaleString("en-US", {minimumFractionDigits: 2})}</span>
-              <span className="text-sm font-semibold text-[var(--orbit-brand-light)]">USDC</span>
+            <div className="flex items-baseline gap-2">
+              <span className="text-4xl font-bold tracking-tight text-white font-mono">{walletBalance.toLocaleString("en-US", {minimumFractionDigits: 2})}</span>
+              <span className="text-sm font-semibold text-[var(--orbit-brand-light)] opacity-80">USDC</span>
             </div>
           </div>
-          {walletBalance === 0 ? (
-            <div className="relative z-10 mt-3 flex items-center justify-between gap-2">
-              <p className="text-[11px] text-[var(--orbit-brand-light)]/80 leading-tight">Add funds to start contributing to an Orbit.</p>
-              <button onClick={openFundingModal} className="shrink-0 bg-[var(--orbit-brand-light)] text-black px-3 py-1.5 rounded-full text-xs font-semibold hover:bg-white transition-colors shadow-sm">
+          
+          <div className="relative z-10 px-5 pb-4 pt-3 flex justify-end">
+            {walletBalance === 0 ? (
+              <button onClick={openFundingModal} className="flex items-center gap-1.5 bg-[var(--orbit-brand-light)] text-black px-3.5 py-1.5 rounded-full text-xs font-semibold hover:bg-white transition-colors shadow-sm">
+                <Wallet size={12} />
                 Add Funds
               </button>
-            </div>
-          ) : (
-            <div className="relative z-10 mt-3 flex justify-end">
-               <button onClick={openFundingModal} className="text-xs font-medium text-[var(--orbit-brand-light)] hover:text-white transition-colors">
-                 + Top up
-               </button>
-            </div>
-          )}
+            ) : (
+              <button onClick={openFundingModal} className="flex items-center gap-1 text-xs font-medium text-[var(--orbit-brand-light)] hover:text-white transition-colors px-2 py-1 rounded-md hover:bg-white/5">
+                <PlusCircle size={13} />
+                Top up
+              </button>
+            )}
+          </div>
         </div>
 
-        <div className="orbit-stat-card group relative overflow-hidden transition-all hover:-translate-y-1 hover:shadow-lg min-h-[140px]">
-          <div className="absolute inset-0 bg-gradient-to-br from-[var(--orbit-brand-bg)] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-          <div className="relative z-10">
-            <div className="text-xs font-semibold uppercase tracking-wider text-[var(--orbit-text-secondary)] mb-2">
+        {/* Active Orbits */}
+        <div className="orbit-shimmer group relative overflow-hidden rounded-xl border border-[var(--orbit-border)] bg-[var(--orbit-bg-card)] transition-all duration-300 hover:-translate-y-1 hover:border-[var(--orbit-brand-border)] min-h-[148px]">
+          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[var(--color-orbit-violet-400)]/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+          <div className="absolute -bottom-8 -right-8 w-24 h-24 bg-[var(--orbit-brand)]/5 rounded-full blur-2xl pointer-events-none group-hover:bg-[var(--orbit-brand)]/10 transition-colors duration-700" />
+          <div className="relative z-10 p-5">
+            <div className="text-[11px] font-semibold uppercase tracking-wider text-[var(--orbit-text-secondary)] mb-3">
               Active Orbits
             </div>
-            <div className="text-3xl font-bold tracking-tight text-[var(--orbit-text-primary)] group-hover:text-[var(--orbit-brand-light)] transition-colors">{activeOrbits}</div>
+            <div className="text-4xl font-bold tracking-tight text-[var(--orbit-text-primary)] group-hover:text-[var(--orbit-brand-light)] transition-colors font-mono">{activeOrbits}</div>
+            <p className="text-[11px] text-[var(--orbit-text-muted)] mt-3">{activeOrbits === 0 ? 'No active circles' : `${activeOrbits} circle${activeOrbits > 1 ? 's' : ''} running`}</p>
           </div>
         </div>
 
-        <div className="orbit-stat-card group relative overflow-hidden transition-all hover:-translate-y-1 hover:shadow-lg min-h-[140px]">
-          <div className="absolute inset-0 bg-gradient-to-br from-[var(--orbit-success-bg)] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-          <div className="relative z-10">
-            <div className="text-xs font-semibold uppercase tracking-wider text-[var(--orbit-text-secondary)] mb-2">
+        {/* Orbit Score */}
+        <div className="orbit-shimmer group relative overflow-hidden rounded-xl border border-[var(--orbit-border)] bg-[var(--orbit-bg-card)] transition-all duration-300 hover:-translate-y-1 hover:border-[var(--orbit-success-border)] min-h-[148px]">
+          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[var(--orbit-success)]/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+          <div className="absolute -bottom-8 -right-8 w-24 h-24 bg-[var(--orbit-success)]/5 rounded-full blur-2xl pointer-events-none group-hover:bg-[var(--orbit-success)]/10 transition-colors duration-700" />
+          <div className="relative z-10 p-5">
+            <div className="text-[11px] font-semibold uppercase tracking-wider text-[var(--orbit-text-secondary)] mb-3">
               Orbit Score
             </div>
-            <div className="text-3xl font-bold tracking-tight text-[var(--orbit-success)] group-hover:text-[var(--orbit-success)] transition-colors">{profile?.orbit_score || 0}</div>
+            <div className="flex items-center gap-3">
+              <span className="text-4xl font-bold tracking-tight text-[var(--orbit-success)] font-mono">{profile?.orbit_score || 0}</span>
+              {/* Mini score ring */}
+              <svg className="w-8 h-8 -rotate-90 opacity-50 group-hover:opacity-80 transition-opacity" viewBox="0 0 36 36">
+                <circle className="stroke-[var(--color-orbit-mist-800)]" strokeWidth="3" cx="18" cy="18" r="14" fill="transparent" />
+                <circle className="stroke-[var(--orbit-success)]" strokeWidth="3" strokeLinecap="round" cx="18" cy="18" r="14" fill="transparent" strokeDasharray="88" strokeDashoffset={88 - (88 * (profile?.orbit_score || 0) / 100)} />
+              </svg>
+            </div>
+            <p className="text-[11px] text-[var(--orbit-text-muted)] mt-3">{profile?.tier || 'Newcomer'}</p>
           </div>
         </div>
 
-        <div className="orbit-stat-card group relative overflow-hidden transition-all hover:-translate-y-1 hover:shadow-lg min-h-[140px]">
-          <div className="absolute inset-0 bg-gradient-to-tl from-[var(--orbit-bg-elevated)] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-          <div className="relative z-10">
-            <div className="text-xs font-semibold uppercase tracking-wider text-[var(--orbit-text-secondary)] mb-2">
+        {/* Total Saved */}
+        <div className="orbit-shimmer group relative overflow-hidden rounded-xl border border-[var(--orbit-border)] bg-[var(--orbit-bg-card)] transition-all duration-300 hover:-translate-y-1 hover:border-[var(--orbit-border-hover)] min-h-[148px]">
+          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[var(--color-orbit-mist-400)]/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+          <div className="relative z-10 p-5">
+            <div className="text-[11px] font-semibold uppercase tracking-wider text-[var(--orbit-text-secondary)] mb-3 flex items-center gap-2">
               Total Saved
+              {totalSaved > 0 && (
+                <span className="text-[9px] font-bold text-[var(--orbit-success)] bg-[var(--orbit-success-bg)] px-1.5 py-0.5 rounded-full">↑</span>
+              )}
             </div>
-            <div className="text-3xl font-bold tracking-tight text-[var(--orbit-text-primary)] group-hover:text-white transition-colors">
-              {totalSaved} <span className="text-lg font-semibold text-[var(--orbit-text-secondary)]">USDC</span>
+            <div className="flex items-baseline gap-2">
+              <span className="text-4xl font-bold tracking-tight text-[var(--orbit-text-primary)] group-hover:text-white transition-colors font-mono">{totalSaved}</span>
+              <span className="text-sm font-semibold text-[var(--orbit-text-muted)]">USDC</span>
             </div>
+            <p className="text-[11px] text-[var(--orbit-text-muted)] mt-3">Lifetime contributions</p>
           </div>
         </div>
       </div>
 
-      {/* Quick Actions */}
-      <div className="flex flex-col gap-4">
-        <h3 className="orbit-eyebrow text-xs tracking-widest text-[var(--orbit-text-muted)]">QUICK ACTIONS</h3>
+      {/* ── Quick Actions ── */}
+      <div className="flex flex-col gap-4" style={{ animation: 'fade-in-up 0.5s ease-out forwards', animationDelay: '0.1s', animationFillMode: 'backwards' }}>
+        <h3 className="orbit-eyebrow text-[11px] tracking-widest text-[var(--orbit-text-muted)]">QUICK ACTIONS</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Link href="/orbits?action=create" className="flex items-center gap-4 bg-[var(--orbit-bg-card)] border border-[var(--orbit-border)] hover:border-[var(--orbit-brand-border)] p-4 rounded-xl transition-all group text-left shadow-sm hover:shadow-md hover:-translate-y-0.5">
-            <div className="w-10 h-10 rounded-full bg-[var(--orbit-brand-bg)] flex items-center justify-center shrink-0 group-hover:bg-[var(--orbit-brand)]/30 transition-colors">
+          <Link href="/orbits?action=create" className="orbit-shimmer flex items-center gap-4 bg-[var(--orbit-bg-card)] border border-[var(--orbit-border)] hover:border-[var(--orbit-brand-border)] p-5 rounded-xl transition-all duration-300 group text-left shadow-sm hover:shadow-lg hover:shadow-[var(--orbit-brand)]/5 hover:-translate-y-0.5">
+            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[var(--color-orbit-violet-600)]/30 to-[var(--orbit-brand-bg)] flex items-center justify-center shrink-0 group-hover:from-[var(--color-orbit-violet-600)]/50 transition-all duration-300 ring-1 ring-[var(--orbit-brand-border)]/50">
               <PlusCircle className="text-[var(--orbit-brand-light)]" size={20} />
             </div>
-            <div>
+            <div className="flex-1 min-w-0">
               <h4 className="text-sm font-semibold text-white">Create Orbit</h4>
-              <p className="text-xs text-[var(--orbit-text-secondary)] mt-0.5">Start a new community savings circle.</p>
+              <p className="text-xs text-[var(--orbit-text-secondary)] mt-0.5">Start a new savings circle.</p>
             </div>
+            <ChevronRight size={16} className="text-[var(--orbit-text-muted)] group-hover:text-[var(--orbit-brand-light)] group-hover:translate-x-0.5 transition-all shrink-0" />
           </Link>
           
-          <Link href="/orbits?action=join" className="flex items-center gap-4 bg-[var(--orbit-bg-card)] border border-[var(--orbit-border)] hover:border-[var(--orbit-brand-border)] p-4 rounded-xl transition-all group text-left shadow-sm hover:shadow-md hover:-translate-y-0.5">
-            <div className="w-10 h-10 rounded-full bg-[var(--orbit-bg-elevated)] flex items-center justify-center shrink-0 group-hover:bg-[var(--orbit-brand)]/20 transition-colors">
+          <Link href="/orbits?action=join" className="orbit-shimmer flex items-center gap-4 bg-[var(--orbit-bg-card)] border border-[var(--orbit-border)] hover:border-[var(--orbit-brand-border)] p-5 rounded-xl transition-all duration-300 group text-left shadow-sm hover:shadow-lg hover:shadow-[var(--orbit-brand)]/5 hover:-translate-y-0.5">
+            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[var(--color-orbit-void-400)]/50 to-[var(--color-orbit-void-500)]/50 flex items-center justify-center shrink-0 group-hover:from-[var(--color-orbit-violet-600)]/30 group-hover:to-[var(--orbit-brand-bg)] transition-all duration-300 ring-1 ring-[var(--orbit-border)]/50 group-hover:ring-[var(--orbit-brand-border)]/50">
               <Users className="text-[var(--orbit-text-primary)] group-hover:text-[var(--orbit-brand-light)] transition-colors" size={20} />
             </div>
-            <div>
+            <div className="flex-1 min-w-0">
               <h4 className="text-sm font-semibold text-white">Join Orbit</h4>
-              <p className="text-xs text-[var(--orbit-text-secondary)] mt-0.5">Join an Orbit using an invite link.</p>
+              <p className="text-xs text-[var(--orbit-text-secondary)] mt-0.5">Join with an invite link.</p>
             </div>
+            <ChevronRight size={16} className="text-[var(--orbit-text-muted)] group-hover:text-[var(--orbit-brand-light)] group-hover:translate-x-0.5 transition-all shrink-0" />
           </Link>
 
-          <button onClick={openFundingModal} className="flex items-center gap-4 bg-[var(--orbit-bg-card)] border border-[var(--orbit-border)] hover:border-[var(--orbit-brand-border)] p-4 rounded-xl transition-all group text-left shadow-sm hover:shadow-md hover:-translate-y-0.5">
-            <div className="w-10 h-10 rounded-full bg-[var(--orbit-bg-elevated)] flex items-center justify-center shrink-0 group-hover:bg-[var(--orbit-brand)]/20 transition-colors">
+          <button onClick={openFundingModal} className="orbit-shimmer flex items-center gap-4 bg-[var(--orbit-bg-card)] border border-[var(--orbit-border)] hover:border-[var(--orbit-brand-border)] p-5 rounded-xl transition-all duration-300 group text-left shadow-sm hover:shadow-lg hover:shadow-[var(--orbit-brand)]/5 hover:-translate-y-0.5">
+            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[var(--color-orbit-void-400)]/50 to-[var(--color-orbit-void-500)]/50 flex items-center justify-center shrink-0 group-hover:from-[var(--color-orbit-violet-600)]/30 group-hover:to-[var(--orbit-brand-bg)] transition-all duration-300 ring-1 ring-[var(--orbit-border)]/50 group-hover:ring-[var(--orbit-brand-border)]/50">
               <Wallet className="text-[var(--orbit-text-primary)] group-hover:text-[var(--orbit-brand-light)] transition-colors" size={20} />
             </div>
-            <div>
+            <div className="flex-1 min-w-0">
               <h4 className="text-sm font-semibold text-white">Add Funds</h4>
-              <p className="text-xs text-[var(--orbit-text-secondary)] mt-0.5">Top up your wallet balance with USDC.</p>
+              <p className="text-xs text-[var(--orbit-text-secondary)] mt-0.5">Top up your wallet balance.</p>
             </div>
+            <ChevronRight size={16} className="text-[var(--orbit-text-muted)] group-hover:text-[var(--orbit-brand-light)] group-hover:translate-x-0.5 transition-all shrink-0" />
           </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 mt-2">
-        {/* Main Content Column */}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 mt-2" style={{ animation: 'fade-in-up 0.5s ease-out forwards', animationDelay: '0.15s', animationFillMode: 'backwards' }}>
+        {/* ── Main Content Column ── */}
         <div className="xl:col-span-2 flex flex-col gap-8">
           
           {/* Active Orbits Section */}
           <div className="flex flex-col gap-5">
             <div className="flex items-center justify-between">
-              <h3 className="orbit-eyebrow text-xs tracking-widest text-[var(--orbit-text-muted)]">
+              <h3 className="orbit-eyebrow text-[11px] tracking-widest text-[var(--orbit-text-muted)]">
                 ACTIVE ORBITS
               </h3>
               {activeOrbits > 0 && (
-                <a href="/orbits" className="text-xs font-medium text-[var(--orbit-brand-light)] hover:text-white transition-colors">
+                <a href="/orbits" className="text-xs font-medium text-[var(--orbit-brand-light)] hover:text-white transition-colors flex items-center gap-1 group">
                   View all
+                  <ChevronRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
                 </a>
               )}
             </div>
 
             {activeOrbits === 0 ? (
-              <div className="flex flex-col items-center justify-center p-10 bg-[var(--orbit-bg-card)] border border-[var(--orbit-border)] rounded-2xl border-dashed">
-                <div className="w-16 h-16 rounded-full bg-[var(--orbit-bg-elevated)] flex items-center justify-center mb-4">
-                  <Users className="text-[var(--orbit-text-muted)]" size={32} />
+              <div className="flex flex-col items-center justify-center p-12 bg-[var(--orbit-bg-card)] border border-[var(--orbit-border)] rounded-2xl border-dashed relative overflow-hidden">
+                {/* Subtle decorative elements */}
+                <div className="absolute top-6 right-8 w-20 h-20 bg-[var(--orbit-brand)]/5 rounded-full blur-2xl pointer-events-none" />
+                <div className="absolute bottom-6 left-8 w-16 h-16 bg-[var(--orbit-success)]/5 rounded-full blur-2xl pointer-events-none" />
+                
+                <div className="w-16 h-16 rounded-2xl bg-[var(--orbit-bg-elevated)] flex items-center justify-center mb-5 ring-1 ring-[var(--orbit-border)]" style={{ animation: 'float-subtle 4s ease-in-out infinite' }}>
+                  <Users className="text-[var(--orbit-text-muted)]" size={28} />
                 </div>
                 <h4 className="text-lg font-semibold text-white mb-2">You haven't joined any Orbit yet.</h4>
-                <p className="text-sm text-[var(--orbit-text-secondary)] text-center max-w-sm mb-6">
+                <p className="text-sm text-[var(--orbit-text-secondary)] text-center max-w-sm mb-7 leading-relaxed">
                   Create your first savings circle or join one using an invite link to start saving with others.
                 </p>
                 <div className="flex gap-3">
-                  <button onClick={() => router.push("/orbits?action=create")} className="orbit-btn-primary text-sm px-6">Create Orbit</button>
-                  <button onClick={() => router.push("/orbits?action=join")} className="orbit-btn-secondary text-sm px-6">Join Orbit</button>
+                  <button onClick={() => router.push("/orbits?action=create")} className="orbit-btn-primary text-sm px-6 py-2.5 rounded-lg shadow-lg shadow-[var(--orbit-brand)]/15">Create Orbit</button>
+                  <button onClick={() => router.push("/orbits?action=join")} className="orbit-btn-secondary text-sm px-6 py-2.5 rounded-lg">Join Orbit</button>
                 </div>
               </div>
             ) : activeOrbitsList.length === 0 ? (
-              <div className="flex flex-col items-center justify-center p-10 bg-[var(--orbit-bg-card)] border border-[var(--orbit-border)] rounded-2xl">
-                <div className="w-16 h-16 rounded-full bg-[var(--orbit-bg-elevated)] flex items-center justify-center mb-4">
-                  <AlertCircle className="text-[var(--orbit-text-muted)]" size={32} />
+              <div className="flex flex-col items-center justify-center p-12 bg-[var(--orbit-bg-card)] border border-[var(--orbit-border)] rounded-2xl relative overflow-hidden">
+                <div className="w-16 h-16 rounded-2xl bg-[var(--orbit-bg-elevated)] flex items-center justify-center mb-5 ring-1 ring-[var(--orbit-border)]" style={{ animation: 'float-subtle 4s ease-in-out infinite' }}>
+                  <AlertCircle className="text-[var(--orbit-text-muted)]" size={28} />
                 </div>
                 <h4 className="text-lg font-semibold text-white mb-2">No Active Orbits yet</h4>
-                <p className="text-sm text-[var(--orbit-text-secondary)] text-center max-w-sm mb-6">
+                <p className="text-sm text-[var(--orbit-text-secondary)] text-center max-w-sm mb-7 leading-relaxed">
                   Your joined orbits are currently waiting for members or pending start. Check 'My Orbits' to manage them.
                 </p>
                 <div className="flex gap-3">
-                  <button onClick={() => router.push("/orbits")} className="orbit-btn-primary text-sm px-6">Go to My Orbits</button>
+                  <button onClick={() => router.push("/orbits")} className="orbit-btn-primary text-sm px-6 py-2.5 rounded-lg shadow-lg shadow-[var(--orbit-brand)]/15">Go to My Orbits</button>
                 </div>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 {activeOrbitsList.map((orbit, index) => (
-                  <div key={orbit.id} className={`orbit-card flex flex-col gap-5 p-6 relative overflow-hidden group transition-all duration-300 bg-gradient-to-b from-[var(--orbit-bg-card)] to-[var(--orbit-bg-app)] ${!orbit.hasDeposited ? 'hover:border-[var(--orbit-warning-border)] hover:shadow-xl' : 'hover:border-[var(--orbit-brand-border)] hover:shadow-xl'}`}>
-                    <div className={`absolute top-0 left-0 w-1 h-full rounded-l-lg ${!orbit.hasDeposited ? 'bg-[var(--orbit-warning)] shadow-[0_0_10px_var(--orbit-warning)]' : 'bg-[var(--orbit-brand)] shadow-[0_0_10px_var(--orbit-brand)]'}`}></div>
+                  <div key={orbit.id} className={`orbit-shimmer group relative rounded-2xl overflow-hidden transition-all duration-300 border bg-gradient-to-b from-[var(--orbit-bg-card)] to-[var(--color-orbit-void-800)] ${!orbit.hasDeposited ? 'border-[var(--orbit-warning-border)]/50 hover:border-[var(--orbit-warning-border)] hover:shadow-xl hover:shadow-[var(--orbit-warning)]/5' : 'border-[var(--orbit-border)] hover:border-[var(--orbit-brand-border)] hover:shadow-xl hover:shadow-[var(--orbit-brand)]/5'}`}>
+                    {/* Accent left bar */}
+                    <div className={`absolute top-0 left-0 w-[3px] h-full ${!orbit.hasDeposited ? 'bg-gradient-to-b from-[var(--orbit-warning)] to-[var(--orbit-warning)]/30' : 'bg-gradient-to-b from-[var(--orbit-brand)] to-[var(--orbit-brand)]/30'}`} />
+                    {/* Background gradient mesh */}
+                    <div className={`absolute -top-16 -right-16 w-40 h-40 rounded-full blur-3xl pointer-events-none opacity-30 group-hover:opacity-50 transition-opacity duration-700 ${!orbit.hasDeposited ? 'bg-[var(--orbit-warning)]/10' : 'bg-[var(--orbit-brand)]/10'}`} />
                     
-                    <div className="flex justify-between items-start">
+                    <div className="relative z-10 p-6 flex flex-col gap-5">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h4 className={`font-semibold text-lg text-white transition-colors ${!orbit.hasDeposited ? 'group-hover:text-[var(--orbit-warning)]' : 'group-hover:text-[var(--orbit-brand-light)]'}`}>
+                            {orbit.name}
+                          </h4>
+                          <p className="text-xs text-[var(--orbit-text-secondary)] mt-1.5 flex items-center gap-1.5">
+                            <span className="inline-flex items-center gap-1">Cycle {orbit.cycle}/{orbit.totalCycles}</span>
+                            <span className="text-[var(--orbit-text-muted)]">•</span>
+                            <span>{orbit.totalCycles} members</span>
+                          </p>
+                        </div>
+                        <button onClick={() => router.push(`/orbits/${orbit.id}`)} className="orbit-btn-neutral rounded-full px-4 py-1.5 text-xs font-semibold active:scale-95 transition-all hover:bg-[var(--orbit-brand-bg)] hover:text-[var(--orbit-brand-light)] hover:border-[var(--orbit-brand-border)]">
+                          Open <ArrowRight size={13} className="inline ml-1" />
+                        </button>
+                      </div>
+
+                      {/* Divider */}
+                      <div className="h-[0.5px] bg-[var(--orbit-border)]" />
+
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs font-medium text-[var(--orbit-text-secondary)]">
+                          Pool: <span className="text-white font-semibold text-sm font-mono">{orbit.poolAmount} USDC</span>
+                        </span>
+                        {orbit.isRecipient ? (
+                          <span className="text-[11px] font-semibold text-[var(--orbit-brand-light)] bg-[var(--orbit-brand-bg)] px-3 py-1.5 rounded-full ring-1 ring-[var(--orbit-brand-border)] flex items-center gap-1.5">
+                            <CheckCircle2 size={12} />
+                            Receiving
+                          </span>
+                        ) : orbit.hasDeposited ? (
+                          <span className="text-[11px] font-semibold text-[var(--orbit-success)] bg-[var(--orbit-success-bg)] px-3 py-1.5 rounded-full ring-1 ring-[var(--orbit-success)]/20 flex items-center gap-1.5">
+                            <CheckCircle2 size={12} />
+                            Deposited
+                          </span>
+                        ) : (
+                          <span className="text-[11px] font-semibold text-[var(--orbit-warning)] bg-[var(--orbit-warning-bg)] px-3 py-1.5 rounded-full flex items-center gap-2 ring-1 ring-[var(--orbit-warning-border)] whitespace-nowrap">
+                            <span className="relative flex h-2 w-2">
+                              <span className="w-2 h-2 rounded-full bg-[var(--orbit-warning)] animate-ping absolute inset-0" />
+                              <span className="w-2 h-2 rounded-full bg-[var(--orbit-warning)] relative" />
+                            </span>
+                            Deposit Due
+                          </span>
+                        )}
+                      </div>
+
                       <div>
-                        <h4 className={`font-semibold text-lg text-white transition-colors ${!orbit.hasDeposited ? 'group-hover:text-[var(--orbit-warning)]' : 'group-hover:text-[var(--orbit-brand-light)]'}`}>
-                          {orbit.name}
-                        </h4>
-                        <p className="text-sm text-[var(--orbit-text-secondary)] mt-1">
-                          Cycle {orbit.cycle} of {orbit.totalCycles} • {orbit.totalCycles} members
+                        <div className="orbit-progress-track mb-2.5 h-1.5 bg-[var(--color-orbit-mist-800)]/60 rounded-full overflow-hidden">
+                          <div
+                            className={`orbit-progress-fill rounded-full h-full relative ${!orbit.hasDeposited ? 'bg-[var(--orbit-warning)]' : 'bg-gradient-to-r from-[var(--orbit-brand)] to-[var(--orbit-brand-light)]'}`}
+                            style={{ width: `${orbit.progressPercent}%`, transition: 'width 0.8s cubic-bezier(0.22, 1, 0.36, 1)' }}
+                          >
+                            {/* Glowing leading edge */}
+                            <div className={`absolute right-0 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full ${!orbit.hasDeposited ? 'bg-[var(--orbit-warning)] shadow-[0_0_8px_var(--orbit-warning)]' : 'bg-[var(--orbit-brand-light)] shadow-[0_0_8px_var(--orbit-brand-light)]'}`} />
+                          </div>
+                        </div>
+                        <p className="text-[11px] font-medium text-[var(--orbit-text-secondary)]">
+                          {orbit.numDeposited} of {orbit.targetDeposits} deposits funded
                         </p>
                       </div>
-                      <button onClick={() => router.push(`/orbits/${orbit.id}`)} className="orbit-btn-neutral rounded-full px-5 py-2 text-sm font-semibold active:scale-95 transition-all">
-                        Open <ArrowRight size={16} className="inline ml-1" />
-                      </button>
-                    </div>
-
-                    <div className="flex justify-between items-end mt-2">
-                      <span className="text-sm font-medium text-[var(--orbit-text-secondary)]">
-                        Pool: <span className="text-white font-semibold text-base">{orbit.poolAmount} USDC</span>
-                      </span>
-                      {orbit.isRecipient ? (
-                        <span className="text-xs font-semibold text-[var(--orbit-brand-light)] bg-[var(--orbit-brand-bg)] px-3 py-1.5 rounded-full ring-1 ring-[var(--orbit-brand-border)]">
-                          Receiving This Cycle
-                        </span>
-                      ) : orbit.hasDeposited ? (
-                        <span className="text-xs font-semibold text-[var(--orbit-success)] bg-[var(--orbit-success-bg)] px-3 py-1.5 rounded-full ring-1 ring-[var(--orbit-success)]/20">
-                          Deposited
-                        </span>
-                      ) : (
-                        <span className="text-xs font-semibold text-[var(--orbit-warning)] bg-[var(--orbit-warning-bg)] px-3 py-1.5 rounded-full flex items-center gap-2 ring-1 ring-[var(--orbit-warning-border)] whitespace-nowrap">
-                          <span className="w-1.5 h-1.5 rounded-full bg-[var(--orbit-warning)] animate-ping absolute"></span>
-                          <span className="w-1.5 h-1.5 rounded-full bg-[var(--orbit-warning)] relative"></span>
-                          Deposit Due
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="mt-2">
-                      <div className="orbit-progress-track mb-3 h-2 bg-[var(--orbit-bg-elevated)] rounded-full overflow-hidden">
-                        <div
-                          className={`orbit-progress-fill rounded-full h-full relative ${!orbit.hasDeposited ? 'bg-[var(--orbit-warning)]' : 'bg-gradient-to-r from-[var(--orbit-brand-light)] to-[var(--orbit-brand)]'}`}
-                          style={{ width: `${orbit.progressPercent}%` }}
-                        >
-                          {orbit.hasDeposited && <div className="absolute inset-0 bg-white/20 animate-pulse"></div>}
-                        </div>
-                      </div>
-                      <p className="text-xs font-medium text-[var(--orbit-text-secondary)]">
-                        {orbit.numDeposited} of {orbit.targetDeposits} deposits funded
-                      </p>
                     </div>
                   </div>
                 ))}
@@ -461,175 +527,217 @@ export default function Dashboard() {
             )}
           </div>
 
-          {/* Orbit Activity Feed */}
+          {/* ── Activity Feed ── */}
           <div className="flex flex-col gap-5">
-            <h3 className="orbit-eyebrow text-xs tracking-widest text-[var(--orbit-text-muted)]">
+            <h3 className="orbit-eyebrow text-[11px] tracking-widest text-[var(--orbit-text-muted)]">
               RECENT ACTIVITY
             </h3>
-            <div className="bg-[var(--orbit-bg-card)] border border-[var(--orbit-border)] rounded-2xl p-2">
+            <div className="bg-[var(--orbit-bg-card)] border border-[var(--orbit-border)] rounded-2xl overflow-hidden">
               {activities.length === 0 ? (
-                <div className="p-6 text-center text-sm text-[var(--orbit-text-secondary)]">
-                  No recent activity yet.
+                <div className="p-8 text-center">
+                  <p className="text-sm text-[var(--orbit-text-secondary)]">No recent activity yet.</p>
+                  <p className="text-xs text-[var(--orbit-text-muted)] mt-1">Activity from your orbits will show up here.</p>
                 </div>
               ) : (
-                activities.map((activity) => (
-                  <div key={activity.id} className="flex items-center gap-4 p-3 hover:bg-[var(--orbit-bg-elevated)] rounded-xl transition-colors">
-                    <div className={`w-10 h-10 rounded-full ${getActivityBg(activity.action_type)} flex items-center justify-center shrink-0`}>
-                      {getActivityIcon(activity.action_type, activity.users?.full_name)}
+                <div className="relative">
+                  {/* Timeline line */}
+                  <div className="absolute left-[31px] top-4 bottom-4 w-[1px] bg-gradient-to-b from-[var(--orbit-border)] via-[var(--orbit-border)] to-transparent pointer-events-none" />
+                  
+                  {activities.map((activity, idx) => (
+                    <div key={activity.id} className={`flex items-center gap-4 px-4 py-3.5 hover:bg-[var(--color-orbit-mist-900)]/50 transition-colors relative ${idx !== activities.length - 1 ? '' : ''}`}>
+                      <div className={`w-10 h-10 rounded-full ${getActivityBg(activity.action_type)} flex items-center justify-center shrink-0 relative z-10 ring-2 ring-[var(--orbit-bg-card)]`}>
+                        {getActivityIcon(activity.action_type, activity.users?.full_name)}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-white truncate">{activity.message}</p>
+                        <p className="text-[11px] text-[var(--orbit-text-muted)] mt-0.5 flex items-center gap-1.5">
+                          <span className="text-[var(--orbit-text-secondary)]">{activity.orbits?.name || 'Orbit'}</span>
+                          <span>•</span>
+                          <span>{formatTimeAgo(activity.created_at)}</span>
+                        </p>
+                      </div>
                     </div>
-                    <div className="flex-1">
-                      <p className="text-sm text-white">{activity.message}</p>
-                      <p className="text-xs text-[var(--orbit-text-secondary)]">
-                        {activity.orbits?.name || 'Orbit'} • {formatTimeAgo(activity.created_at)}
-                      </p>
-                    </div>
-                  </div>
-                ))
+                  ))}
+                </div>
               )}
             </div>
           </div>
 
         </div>
 
-        {/* Side Column */}
+        {/* ── Side Column ── */}
         <div className="flex flex-col gap-8">
           {/* Orbit Score Preview Card */}
           <div className="flex flex-col gap-5">
-            <h3 className="orbit-eyebrow text-xs tracking-widest text-[var(--orbit-text-muted)]">
+            <h3 className="orbit-eyebrow text-[11px] tracking-widest text-[var(--orbit-text-muted)]">
               YOUR REPUTATION
             </h3>
-            <div className="orbit-card bg-[var(--orbit-bg-card)] border-[var(--orbit-border)] rounded-2xl p-6 relative overflow-hidden flex flex-col items-center text-center">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--orbit-success)]/10 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"></div>
+            <div className="bg-[var(--orbit-bg-card)] border border-[var(--orbit-border)] rounded-2xl p-6 relative overflow-hidden flex flex-col items-center text-center group hover:border-[var(--orbit-success-border)]/50 transition-colors duration-500">
+              {/* Decorative glows */}
+              <div className="absolute top-0 right-0 w-40 h-40 bg-[var(--orbit-success)]/5 rounded-full blur-3xl -mr-12 -mt-12 pointer-events-none group-hover:bg-[var(--orbit-success)]/10 transition-colors duration-700" />
+              <div className="absolute bottom-0 left-0 w-32 h-32 bg-[var(--orbit-brand)]/5 rounded-full blur-3xl -ml-10 -mb-10 pointer-events-none" />
               
+              {/* Score ring */}
               <div className="relative w-32 h-32 mb-6 flex items-center justify-center">
+                {/* Radial glow behind score */}
+                <div className="absolute inset-4 rounded-full bg-[var(--orbit-success)]/5 blur-xl pointer-events-none" />
                 <svg className="w-full h-full -rotate-90 transform" viewBox="0 0 100 100">
-                  <circle className="text-[var(--orbit-bg-elevated)] stroke-current" strokeWidth="8" cx="50" cy="50" r="40" fill="transparent"></circle>
-                  <circle className="text-[var(--orbit-success)] stroke-current" strokeWidth="8" strokeLinecap="round" cx="50" cy="50" r="40" fill="transparent" strokeDasharray="251.2" strokeDashoffset="10.048"></circle>
+                  <circle className="stroke-[var(--color-orbit-mist-800)]" strokeWidth="6" cx="50" cy="50" r="40" fill="transparent" />
+                  <circle
+                    className="stroke-[var(--orbit-success)]"
+                    strokeWidth="6"
+                    strokeLinecap="round"
+                    cx="50" cy="50" r="40"
+                    fill="transparent"
+                    strokeDasharray="251.2"
+                    strokeDashoffset={251.2 - (251.2 * (profile?.orbit_score || 0) / 100)}
+                    style={{ animation: 'score-ring-fill 1.5s cubic-bezier(0.22, 1, 0.36, 1) forwards', filter: 'drop-shadow(0 0 4px rgba(90, 206, 167, 0.3))' }}
+                  />
                 </svg>
-                <div className="absolute inset-0 flex flex-col items-center justify-center text-[var(--orbit-success)]">
-                  <span className="text-4xl font-bold">{profile?.orbit_score || 0}</span>
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <span className="text-4xl font-bold text-[var(--orbit-success)] font-mono">{profile?.orbit_score || 0}</span>
                 </div>
               </div>
 
-              <h4 className="text-lg font-bold text-white mb-1">{profile?.tier || 'Newcomer'}</h4>
-              <p className="text-sm text-[var(--orbit-text-secondary)] mb-6">Build your reputation.</p>
+              {/* Tier badge */}
+              <div className="inline-flex items-center gap-1.5 bg-gradient-to-r from-[var(--orbit-success-bg)] to-transparent px-3 py-1 rounded-full ring-1 ring-[var(--orbit-success-border)] mb-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-[var(--orbit-success)]" />
+                <span className="text-sm font-bold text-white">{profile?.tier || 'Newcomer'}</span>
+              </div>
+              <p className="text-xs text-[var(--orbit-text-secondary)] mb-6">Build your reputation with on-time deposits.</p>
 
-              <div className="w-full grid grid-cols-2 gap-4 mb-6">
-                <div className="bg-[var(--orbit-bg-app)] rounded-xl p-3 text-center border border-[var(--orbit-border)]">
-                  <div className="text-xs text-[var(--orbit-text-secondary)] mb-1">Reliability</div>
-                  <div className="text-lg font-semibold text-white">{profile?.reliability_rate || 100}%</div>
+              <div className="w-full grid grid-cols-2 gap-3 mb-6">
+                <div className="bg-[var(--orbit-bg-app)] rounded-xl p-3.5 text-center border border-[var(--orbit-border)] hover:border-[var(--orbit-border-hover)] transition-colors">
+                  <div className="text-[11px] text-[var(--orbit-text-muted)] mb-1.5 font-medium">Reliability</div>
+                  <div className="text-lg font-bold text-white font-mono">{profile?.reliability_rate || 100}%</div>
                 </div>
-                <div className="bg-[var(--orbit-bg-app)] rounded-xl p-3 text-center border border-[var(--orbit-border)]">
-                  <div className="text-xs text-[var(--orbit-text-secondary)] mb-1">Achievements</div>
-                  <div className="text-lg font-semibold text-white">{achievements}</div>
+                <div className="bg-[var(--orbit-bg-app)] rounded-xl p-3.5 text-center border border-[var(--orbit-border)] hover:border-[var(--orbit-border-hover)] transition-colors">
+                  <div className="text-[11px] text-[var(--orbit-text-muted)] mb-1.5 font-medium">Achievements</div>
+                  <div className="text-lg font-bold text-white font-mono">{achievements}</div>
                 </div>
               </div>
 
-              <Link href="/score" className="w-full orbit-btn-secondary py-3 flex items-center justify-center gap-2 group">
+              <Link href="/score" className="w-full orbit-btn-secondary py-3 flex items-center justify-center gap-2 group/link rounded-lg hover:bg-[var(--orbit-success-bg)] hover:border-[var(--orbit-success-border)] hover:text-[var(--orbit-success)] transition-all">
                 View Full Orbit Score
-                <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                <ChevronRight size={16} className="group-hover/link:translate-x-1 transition-transform" />
               </Link>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Simulated Funding Modal */}
+      {/* ── Funding Modal ── */}
       {isFundingOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-          <div className="bg-[var(--orbit-bg-card)] border border-[var(--orbit-border)] rounded-2xl shadow-2xl w-full max-w-md overflow-hidden relative">
-            <button onClick={closeFundingModal} className="absolute top-4 right-4 text-[var(--orbit-text-secondary)] hover:text-white transition-colors z-10">
-              <X size={20} />
+        <div className="orbit-modal-overlay">
+          <div className="orbit-modal-panel">
+            {/* Decorative glow */}
+            <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-40 h-40 bg-[var(--orbit-brand)]/10 rounded-full blur-3xl pointer-events-none" />
+            
+            <button onClick={closeFundingModal} className="absolute top-4 right-4 w-8 h-8 rounded-lg bg-[var(--color-orbit-mist-900)] hover:bg-[var(--color-orbit-mist-800)] flex items-center justify-center text-[var(--orbit-text-secondary)] hover:text-white transition-colors z-10">
+              <X size={16} />
             </button>
             
             {fundingStep === "amount" && (
-              <div className="p-6 md:p-8">
-                <div className="flex items-center justify-center w-12 h-12 rounded-full bg-[var(--orbit-brand-bg)] mb-6">
-                  <Wallet className="text-[var(--orbit-brand-light)]" size={24} />
+              <div className="p-6 md:p-8 relative">
+                <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-[var(--color-orbit-violet-600)]/30 to-[var(--orbit-brand-bg)] ring-1 ring-[var(--orbit-brand-border)] mb-6" style={{ boxShadow: '0 0 20px rgba(124, 110, 247, 0.15)' }}>
+                  <Wallet className="text-[var(--orbit-brand-light)]" size={22} />
                 </div>
-                <h2 className="text-xl font-bold text-white mb-2">Add Funds</h2>
+                <h2 className="text-xl font-bold text-white mb-1.5">Add Funds</h2>
                 <p className="text-sm text-[var(--orbit-text-secondary)] mb-8">Select an amount to top up your wallet.</p>
                 
-                <div className="grid grid-cols-2 gap-4 mb-6">
+                <div className="grid grid-cols-2 gap-3 mb-6">
                   {[50, 100, 250, 500].map(amount => (
                     <button 
                       key={amount}
                       onClick={() => handleAmountSelect(amount)}
-                      className="border border-[var(--orbit-border)] hover:border-[var(--orbit-brand-border)] bg-[var(--orbit-bg-app)] hover:bg-[var(--orbit-brand-bg)] text-white py-4 rounded-xl font-semibold transition-colors flex flex-col items-center"
+                      className="group/amt border border-[var(--orbit-border)] hover:border-[var(--orbit-brand-border)] bg-[var(--orbit-bg-app)] hover:bg-[var(--orbit-brand-bg)] text-white py-4 rounded-xl font-semibold transition-all duration-200 flex flex-col items-center hover:shadow-lg hover:shadow-[var(--orbit-brand)]/10 hover:-translate-y-0.5 active:scale-[0.97]"
                     >
-                      <span className="text-xl">{amount}</span>
-                      <span className="text-xs text-[var(--orbit-brand-light)]">USDC</span>
+                      <span className="text-xl font-mono group-hover/amt:text-[var(--orbit-brand-light)] transition-colors">{amount}</span>
+                      <span className="text-[11px] text-[var(--orbit-text-muted)] group-hover/amt:text-[var(--orbit-brand-light)]/70 transition-colors mt-0.5">USDC</span>
                     </button>
                   ))}
                 </div>
                 
                 <div className="mt-4">
-                  <label className="text-xs text-[var(--orbit-text-secondary)] font-medium mb-2 block">Custom Amount</label>
+                  <label className="text-[11px] text-[var(--orbit-text-secondary)] font-medium mb-2 block uppercase tracking-wider">Custom Amount</label>
                   <div className="relative">
                     <input 
                       type="number" 
                       placeholder="0.00"
-                      className="w-full bg-[var(--orbit-bg-app)] border border-[var(--orbit-border)] rounded-xl py-3 px-4 text-white focus:outline-none focus:border-[var(--orbit-brand)] transition-colors pl-14"
+                      className="w-full bg-[var(--orbit-bg-app)] border border-[var(--orbit-border)] rounded-xl py-3.5 px-4 text-white focus:outline-none focus:border-[var(--orbit-brand)] focus:ring-1 focus:ring-[var(--orbit-brand)]/30 transition-all pl-16 font-mono text-lg"
                       onChange={(e) => setFundingAmount(Number(e.target.value))}
                     />
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 font-semibold text-[var(--orbit-brand-light)]">USDC</span>
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-semibold text-[var(--orbit-brand-light)]">USDC</span>
                   </div>
-                  <button onClick={() => fundingAmount > 0 && handleAmountSelect(fundingAmount)} className={`w-full orbit-btn-primary py-3 mt-4 ${fundingAmount === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}>Continue</button>
+                  <button onClick={() => fundingAmount > 0 && handleAmountSelect(fundingAmount)} className={`w-full orbit-btn-primary py-3.5 mt-4 rounded-lg text-sm ${fundingAmount === 0 ? 'opacity-40 cursor-not-allowed' : 'shadow-lg shadow-[var(--orbit-brand)]/20'}`}>Continue</button>
                 </div>
               </div>
             )}
 
             {fundingStep === "checkout" && (
-              <div className="p-6 md:p-8">
-                <h2 className="text-xl font-bold text-white mb-2">Checkout</h2>
-                <p className="text-sm text-[var(--orbit-text-secondary)] mb-6">You are funding <span className="font-bold text-white">{fundingAmount} USDC</span></p>
+              <div className="p-6 md:p-8 relative">
+                <h2 className="text-xl font-bold text-white mb-1.5">Checkout</h2>
+                <p className="text-sm text-[var(--orbit-text-secondary)] mb-6">You are funding <span className="font-bold text-white font-mono">{fundingAmount} USDC</span></p>
                 
                 <form onSubmit={handleCheckoutSubmit} className="flex flex-col gap-4">
                   <div>
-                    <label className="text-xs text-[var(--orbit-text-secondary)] font-medium mb-1.5 block">Cardholder Name</label>
-                    <input required type="text" defaultValue={profile?.full_name || ""} className="w-full bg-[var(--orbit-bg-app)] border border-[var(--orbit-border)] rounded-xl py-3 px-4 text-white focus:outline-none focus:border-[var(--orbit-brand)]" />
+                    <label className="text-[11px] text-[var(--orbit-text-secondary)] font-medium mb-1.5 block uppercase tracking-wider">Cardholder Name</label>
+                    <input required type="text" defaultValue={profile?.full_name || ""} className="w-full bg-[var(--orbit-bg-app)] border border-[var(--orbit-border)] rounded-xl py-3 px-4 text-white focus:outline-none focus:border-[var(--orbit-brand)] focus:ring-1 focus:ring-[var(--orbit-brand)]/30 transition-all" />
                   </div>
                   <div>
-                    <label className="text-xs text-[var(--orbit-text-secondary)] font-medium mb-1.5 block">Card Number</label>
-                    <input required type="text" defaultValue="4242 4242 4242 4242" className="w-full bg-[var(--orbit-bg-app)] border border-[var(--orbit-border)] rounded-xl py-3 px-4 text-white font-mono focus:outline-none focus:border-[var(--orbit-brand)]" />
+                    <label className="text-[11px] text-[var(--orbit-text-secondary)] font-medium mb-1.5 block uppercase tracking-wider">Card Number</label>
+                    <input required type="text" defaultValue="4242 4242 4242 4242" className="w-full bg-[var(--orbit-bg-app)] border border-[var(--orbit-border)] rounded-xl py-3 px-4 text-white font-mono focus:outline-none focus:border-[var(--orbit-brand)] focus:ring-1 focus:ring-[var(--orbit-brand)]/30 transition-all" />
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="text-xs text-[var(--orbit-text-secondary)] font-medium mb-1.5 block">Expiry</label>
-                      <input required type="text" defaultValue="12/28" className="w-full bg-[var(--orbit-bg-app)] border border-[var(--orbit-border)] rounded-xl py-3 px-4 text-white focus:outline-none focus:border-[var(--orbit-brand)]" />
+                      <label className="text-[11px] text-[var(--orbit-text-secondary)] font-medium mb-1.5 block uppercase tracking-wider">Expiry</label>
+                      <input required type="text" defaultValue="12/28" className="w-full bg-[var(--orbit-bg-app)] border border-[var(--orbit-border)] rounded-xl py-3 px-4 text-white font-mono focus:outline-none focus:border-[var(--orbit-brand)] focus:ring-1 focus:ring-[var(--orbit-brand)]/30 transition-all" />
                     </div>
                     <div>
-                      <label className="text-xs text-[var(--orbit-text-secondary)] font-medium mb-1.5 block">CVV</label>
-                      <input required type="text" defaultValue="123" className="w-full bg-[var(--orbit-bg-app)] border border-[var(--orbit-border)] rounded-xl py-3 px-4 text-white focus:outline-none focus:border-[var(--orbit-brand)]" />
+                      <label className="text-[11px] text-[var(--orbit-text-secondary)] font-medium mb-1.5 block uppercase tracking-wider">CVV</label>
+                      <input required type="text" defaultValue="123" className="w-full bg-[var(--orbit-bg-app)] border border-[var(--orbit-border)] rounded-xl py-3 px-4 text-white font-mono focus:outline-none focus:border-[var(--orbit-brand)] focus:ring-1 focus:ring-[var(--orbit-brand)]/30 transition-all" />
                     </div>
                   </div>
                   
-                  <button type="submit" className="w-full orbit-btn-primary py-3 mt-4 flex items-center justify-center gap-2">
+                  <button type="submit" className="w-full orbit-btn-primary py-3.5 mt-2 rounded-lg flex items-center justify-center gap-2 shadow-lg shadow-[var(--orbit-brand)]/20 text-sm">
                     Pay {fundingAmount} USDC <ArrowRight size={16} />
                   </button>
-                  <button type="button" onClick={() => setFundingStep("amount")} className="w-full text-sm text-[var(--orbit-text-secondary)] hover:text-white mt-2">Back</button>
+                  <button type="button" onClick={() => setFundingStep("amount")} className="w-full text-xs text-[var(--orbit-text-secondary)] hover:text-white transition-colors mt-1 py-2">← Back to amounts</button>
                 </form>
               </div>
             )}
 
             {fundingStep === "processing" && (
-              <div className="p-6 md:p-12 flex flex-col items-center text-center justify-center min-h-[300px]">
-                <Loader2 className="w-16 h-16 text-[var(--orbit-brand)] animate-spin mb-6" />
-                <h2 className="text-2xl font-bold text-white mb-2 animate-pulse">Processing Payment</h2>
-                <p className="text-sm text-[var(--orbit-text-secondary)]">Please wait while we secure your funds...</p>
+              <div className="p-6 md:p-12 flex flex-col items-center text-center justify-center min-h-[340px] relative">
+                {/* Pulsing ring */}
+                <div className="relative w-20 h-20 mb-8">
+                  <div className="absolute inset-0 rounded-full border-2 border-[var(--orbit-brand)]/20 animate-ping" />
+                  <div className="absolute inset-2 rounded-full border-2 border-[var(--orbit-brand)]/30 animate-ping" style={{ animationDelay: '0.3s' }} />
+                  <div className="w-full h-full rounded-full bg-[var(--orbit-brand-bg)] flex items-center justify-center ring-1 ring-[var(--orbit-brand-border)]">
+                    <Loader2 className="w-10 h-10 text-[var(--orbit-brand-light)] animate-spin" />
+                  </div>
+                </div>
+                <h2 className="text-xl font-bold text-white mb-2">Processing Payment</h2>
+                <p className="text-sm text-[var(--orbit-text-secondary)]">Securing your funds on the network...</p>
               </div>
             )}
 
             {fundingStep === "success" && (
-              <div className="p-6 md:p-10 flex flex-col items-center text-center">
-                <div className="w-24 h-24 rounded-full bg-[var(--orbit-success)]/20 flex items-center justify-center mb-6 ring-4 ring-[var(--orbit-success)]/30 shadow-[0_0_30px_rgba(46,213,115,0.4)] animate-[pulse_2s_ease-in-out_infinite]">
-                  <CheckCircle2 className="text-[var(--orbit-success)] w-12 h-12" />
+              <div className="p-6 md:p-10 flex flex-col items-center text-center relative overflow-hidden">
+                {/* Radial burst */}
+                <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-radial from-[var(--orbit-success)]/10 to-transparent rounded-full blur-2xl pointer-events-none" />
+                
+                <div className="relative w-24 h-24 mb-6">
+                  <div className="absolute inset-0 rounded-full bg-[var(--orbit-success)]/10 animate-ping" style={{ animationDuration: '2s' }} />
+                  <div className="w-full h-full rounded-full bg-[var(--orbit-success)]/15 flex items-center justify-center ring-2 ring-[var(--orbit-success)]/30" style={{ boxShadow: '0 0 40px rgba(90, 206, 167, 0.3)' }}>
+                    <CheckCircle2 className="text-[var(--orbit-success)] w-12 h-12" />
+                  </div>
                 </div>
                 <h2 className="text-2xl font-bold text-white mb-2">Funds Added Successfully</h2>
                 <p className="text-sm text-[var(--orbit-text-secondary)] mb-8">
-                  Your wallet has been topped up with <span className="font-bold text-[var(--orbit-success)]">{fundingAmount} USDC</span>.
+                  Your wallet has been topped up with <span className="font-bold text-[var(--orbit-success)] font-mono">{fundingAmount} USDC</span>.
                 </p>
-                <button onClick={() => window.location.reload()} className="w-full orbit-btn-primary py-3 hover:scale-[1.02] transition-transform">Return to Dashboard</button>
+                <button onClick={() => window.location.reload()} className="w-full orbit-btn-primary py-3.5 rounded-lg shadow-lg shadow-[var(--orbit-brand)]/20 hover:shadow-[var(--orbit-brand)]/30 transition-all text-sm">Return to Dashboard</button>
               </div>
             )}
           </div>
@@ -638,3 +746,4 @@ export default function Dashboard() {
     </div>
   );
 }
+

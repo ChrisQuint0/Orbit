@@ -41,10 +41,6 @@ export function Hero() {
             >
               Start an Orbit
             </Link>
-            <Button variant="neutral" size="lg">
-              <Play className="h-3.5 w-3.5" strokeWidth={2} />
-              Watch Demo
-            </Button>
           </div>
         </motion.div>
 

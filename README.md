@@ -4,7 +4,7 @@ Community saving, reimagined.
 
 ## Problem
 
-Traditional community savings circles (historically known as _paluwagan_ in the Philippines or _tandas_ globally) are vital tools for informal financial security and collaborative savings. However, they rely entirely on manual record-keeping and absolute trust. This makes them highly vulnerable to default, lack of transparency, administrative errors, and theft, with no security or automated recourse for participants.
+Traditional community savings circles (historically known as _paluwagan_ in the Philippines or _tandas_ globally) are vital tools for informal financial security and collaborative savings. However, they rely entirely on manual record-keeping and absolute trust. This makes them highly vulnerable to default, lack of transparency, administrative errors, and theft, with no security or automated recourse for participants. This matters because a large portion of the Philippine population remains unbanked or underbanked, relying heavily on these informal systems for financial liquidity.
 
 ## How It Works
 
@@ -20,73 +20,51 @@ Traditional community savings circles (historically known as _paluwagan_ in the 
 
 ## Track
 
-**Track 2 — Financial Inclusion & Everyday Payments**
+Track 2 — Financial Inclusion & Everyday Payments
 
 ## Tech Stack
 
-- Framework: Next.js (React)
-- TailwindCSS (Styling)
-- Framer Motion (Micro-animations)
-- Network: Stellar Testnet
-
-## Project Structure
-
-```text
-├── app/                  # Next.js App Router root
-│   ├── globals.css       # Global styles and Tailwind CSS configurations
-│   ├── icon.png          # App favicon / icon
-│   ├── layout.tsx        # Root layout configuration
-│   └── page.tsx          # Main landing page
-├── components/           # Reusable React components
-│   ├── ui/               # Shadcn UI primitives (button, card, input, label)
-│   ├── final-cta.tsx     # Final call-to-action section
-│   ├── footer.tsx        # Page footer component
-│   ├── hero-background.tsx # Interactive SVG background graphics
-│   ├── hero.tsx          # Landing page hero section
-│   ├── how-it-works.tsx  # Interactive step-by-step guide
-│   ├── navbar.tsx        # Header navigation bar
-│   ├── orbit-logo.tsx    # Branded SVG logo component
-│   ├── orbit-ring.tsx    # Interactive orbit rings illustration
-│   ├── orbit-score.tsx   # Trust score visual display
-│   ├── section-heading.tsx # Reusable section title component
-│   └── trust-section.tsx # Transparency and security features section
-├── lib/                  # Application utility helpers
-│   └── utils.ts          # Tailwind CSS classes merger helper
-├── public/               # Static assets (logos, svgs)
-└── tsconfig.json         # TypeScript configuration
-```
+- Framework: Next.js / React
+- Stellar SDK: @stellar/stellar-sdk v16.0.1
+- Network: testnet
+- TailwindCSS, Framer Motion, Supabase
 
 ## Setup & Run
 
-Ensure you have [Node.js](https://nodejs.org) installed.
+Check it out on: orbit-cq.vercel.app
+
+Ensure you have Node.js installed.
 
 ```bash
-# Clone the repository
-git clone https://github.com/ChrisQuint0/orbit.git
-
-# Navigate to the project directory
+git clone https://github.com/ChrisQuint0/Orbit.git
 cd orbit
-
-# Install dependencies
 npm install
+# environment variables needed:
+# NEXT_PUBLIC_SUPABASE_URL=https://xpznumqslfhqzloobmen.supabase.co
+# NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhwem51bXFzbGZocXpsb29ibWVuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxOTU5MDgsImV4cCI6MjA5Nzc3MTkwOH0.VegkNzRO_ICzC3nl3zxqxj3a5LRMc0ilBZVl8o31oTg
 
-# Run the development server
+#SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhwem51bXFzbGZocXpsb29ibWVuIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MjE5NTkwOCwiZXhwIjoyMDk3NzcxOTA4fQ.ijzMyFlOzIoSSv_G04QAD1ehSzVlGvZZKNkfjzvzTC0
+
+#WALLET_ENCRYPTION_KEY="f8a7b9c0d1e2f3a4b5c6d7e8f9a0b1c2"
+
+#ORBIT_TREASURY_SECRET="SBI2ZGXDAK6H23KDW6IWUHAHNDSYKJBRLMV4LC6DHX6NDR432W2J65GR"
+
+#NEXT_PUBLIC_ORBIT_USDC_ISSUER="GDXB4K5NEQYEV2BAKKWUJRJYT7VENPJTKUJVF22LK5B4NGXZE42NCR5L"
+
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
 ## Network Details
 
-- Network: Stellar Testnet
-- RPC URL: [endpoint]
-- Contract IDs: [if any]
-- Asset issuers: [if any]
+- Network: testnet
+- RPC URL: https://soroban-testnet.stellar.org
+- Contract IDs: TBD
+- Asset issuers: GDXB4K5NEQYEV2BAKKWUJRJYT7VENPJTKUJVF22LK5B4NGXZE42NCR5L
 
-## Team (Solo Project)
+## Team
 
-- Christopher A. Quinto - @ChrisQuint0
+- Christopher A. Quinto — @ChrisQuint0
 
 ## License
 
-This project is licensed under the MIT License.
+MIT

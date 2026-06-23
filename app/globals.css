@@ -415,6 +415,35 @@
     transform: scale(0.98);
   }
 
+  /* ── Button — secondary (outlined) ── */
+  .orbit-btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background-color: transparent;
+    color: var(--color-orbit-mist-200);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 14px;
+    border-radius: var(--radius-orbit-md);
+    border: 1px solid var(--orbit-border-hover);
+    cursor: pointer;
+    transition:
+      background-color var(--duration-orbit-base) var(--ease-orbit-out),
+      border-color var(--duration-orbit-base) var(--ease-orbit-out),
+      color var(--duration-orbit-base) var(--ease-orbit-out);
+  }
+  .orbit-btn-secondary:hover {
+    background-color: var(--color-orbit-mist-900);
+    border-color: var(--orbit-border-strong);
+    color: var(--orbit-text-primary);
+  }
+  .orbit-btn-secondary:active {
+    transform: scale(0.98);
+    transition-duration: var(--duration-orbit-fast);
+  }
+
   /* ── Button — neutral / secondary ── */
   .orbit-btn-neutral {
     display: inline-flex;
@@ -551,4 +580,174 @@
     background-color: var(--orbit-success-bg);
     color: var(--orbit-success);
   }
+
+  /* ── Glassmorphism panel ── */
+  .orbit-glass {
+    background: rgba(15, 15, 20, 0.6);
+    backdrop-filter: blur(16px) saturate(1.4);
+    -webkit-backdrop-filter: blur(16px) saturate(1.4);
+  }
+
+  /* ── Gradient text ── */
+  .orbit-gradient-text {
+    background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 50%, #94a3b8 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* ── Shimmer overlay (for cards) ── */
+  .orbit-shimmer {
+    position: relative;
+    overflow: hidden;
+  }
+  .orbit-shimmer::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      110deg,
+      transparent 25%,
+      rgba(255, 255, 255, 0.04) 37%,
+      transparent 63%
+    );
+    transform: translateX(-100%);
+    transition: none;
+    pointer-events: none;
+  }
+  .orbit-shimmer:hover::after {
+    animation: shimmer 0.8s ease-out forwards;
+  }
+
+  /* ── Modal overlay ── */
+  .orbit-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    animation: overlay-enter 0.25s var(--ease-orbit-out) forwards;
+  }
+
+  .orbit-modal-panel {
+    background: linear-gradient(
+      180deg,
+      var(--color-orbit-void-600) 0%,
+      var(--color-orbit-void-700) 100%
+    );
+    border: 1px solid var(--orbit-border-hover);
+    border-radius: var(--radius-orbit-xl);
+    box-shadow:
+      0 0 0 1px rgba(124, 110, 247, 0.08),
+      0 24px 64px -16px rgba(0, 0, 0, 0.6),
+      0 8px 20px -8px rgba(0, 0, 0, 0.4);
+    width: 100%;
+    max-width: 28rem;
+    overflow: hidden;
+    position: relative;
+    animation: modal-enter 0.3s var(--ease-orbit-spring) forwards;
+  }
 }
+
+/* ═══════════════════════════════════════════════════════════
+   KEYFRAME ANIMATIONS
+   Premium micro-interactions for enterprise feel.
+════════════════════════════════════════════════════════════ */
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes fade-in-up {
+  0% {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes glow-pulse {
+  0%, 100% {
+    box-shadow:
+      0 0 12px rgba(124, 110, 247, 0.15),
+      0 0 24px rgba(124, 110, 247, 0.08);
+  }
+  50% {
+    box-shadow:
+      0 0 20px rgba(124, 110, 247, 0.25),
+      0 0 40px rgba(124, 110, 247, 0.12);
+  }
+}
+
+@keyframes score-ring-fill {
+  from { stroke-dashoffset: 251.2; }
+}
+
+@keyframes overlay-enter {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modal-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 0.04; }
+  50% { opacity: 0.08; }
+}
+
+@keyframes float-subtle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+@keyframes float-medal {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-6px) rotate(2deg); }
+}
+
+@keyframes scan-line {
+  0% { top: 0%; opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { top: 100%; opacity: 0; }
+}
+
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.orbit-medal-unlocked {
+  animation: float-medal 5s ease-in-out infinite;
+}
+
+.orbit-avatar-scan::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--orbit-brand), transparent);
+  box-shadow: 0 0 8px var(--orbit-brand);
+  animation: scan-line 4s linear infinite;
+  pointer-events: none;
+}
+

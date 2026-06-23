@@ -3,7 +3,7 @@ import { OrbitLogo } from "@/components/orbit-logo";
 const footerLinks = [
   { label: "About", href: "#about" },
   { label: "How It Works", href: "#how-it-works" },
-  { label: "Sign In", href: "/sign-in" },
+  { label: "Sign In", href: "/?auth=open" },
 ];
 
 export function Footer() {
