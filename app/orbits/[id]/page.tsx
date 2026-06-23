@@ -13,6 +13,7 @@ import {
   Trophy,
   X,
   ListOrdered,
+  ExternalLink,
 } from "lucide-react";
 import { EditReleaseOrderModal, CrewMember } from "@/components/edit-release-order-modal";
 
@@ -106,7 +107,6 @@ export default function OrbitDetailPage({
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
-            <button className="orbit-btn-neutral">View Contract</button>
             <button 
               onClick={() => setIsEditOrderModalOpen(true)}
               className="orbit-btn-neutral flex items-center gap-2"
@@ -114,7 +114,6 @@ export default function OrbitDetailPage({
               <ListOrdered className="h-4 w-4" />
               Edit Release Order
             </button>
-            <button className="orbit-btn-ghost">Invite Members</button>
           </div>
         </div>
 
@@ -292,9 +291,16 @@ export default function OrbitDetailPage({
                       >
                         {item.action}
                       </p>
-                      <time className="text-[10px] text-[var(--orbit-text-muted)]">
-                        {item.time}
-                      </time>
+                      <div className="flex items-center justify-between mt-1">
+                        <time className="text-[10px] text-[var(--orbit-text-muted)]">
+                          {item.time}
+                        </time>
+                        {item.action !== "Orbit Created" && (
+                          <a href="https://stellar.expert/explorer/testnet" target="_blank" rel="noopener noreferrer" className="text-[10px] text-[var(--orbit-brand-light)] hover:text-white hover:underline flex items-center gap-1 transition-colors">
+                            View on Ledger <ExternalLink className="h-3 w-3" />
+                          </a>
+                        )}
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -347,9 +353,16 @@ export default function OrbitDetailPage({
                       >
                         {item.action}
                       </p>
-                      <time className="text-xs text-[var(--orbit-text-muted)]">
-                        {item.time}
-                      </time>
+                      <div className="flex items-center justify-between mt-2">
+                        <time className="text-xs text-[var(--orbit-text-muted)]">
+                          {item.time}
+                        </time>
+                        {item.action !== "Orbit Created" && (
+                          <a href="https://stellar.expert/explorer/testnet" target="_blank" rel="noopener noreferrer" className="text-xs text-[var(--orbit-brand-light)] hover:text-white hover:underline flex items-center gap-1 transition-colors">
+                            View on Ledger <ExternalLink className="h-3 w-3" />
+                          </a>
+                        )}
+                      </div>
                     </div>
                   </div>
                 ))}

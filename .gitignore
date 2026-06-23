@@ -42,3 +42,10 @@ next-env.d.
 
 # local context
 CONTEXT.md
+
+#database context
+schema.sql
+
+#plans
+Orbit_Plan.md
+Orbit_User_Flow_Requirements.md

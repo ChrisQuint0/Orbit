@@ -32,12 +32,15 @@ export function FinalCta() {
             Set up your Crew, choose a schedule, and let the smart contract
             handle the rest.
           </p>
-          <div className="mt-8 flex flex-col items-center gap-3">
+          <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Link
-              href="/login"
-              className={cn(buttonVariants({ variant: "primary", size: "lg" }))}
+              href="/?auth=open"
+              className={cn(
+                buttonVariants({ variant: "primary", size: "lg" }),
+                "min-w-[200px]"
+              )}
             >
-              Create an Orbit
+              Start an Orbit
             </Link>
             <a
               href="#how-it-works"

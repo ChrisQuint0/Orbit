@@ -34,9 +34,9 @@ export function Hero() {
             Deposit with your Crew, and let the smart contract handle the rest.
           </p>
 
-          <div className="mt-8 flex flex-wrap items-center gap-3">
+          <div className="flex flex-col gap-3 sm:flex-row mt-8">
             <Link
-              href="/login"
+              href="/?auth=open"
               className={cn(buttonVariants({ variant: "primary", size: "lg" }))}
             >
               Start an Orbit

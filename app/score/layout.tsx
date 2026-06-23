@@ -2,7 +2,7 @@ import * as React from "react"
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/app-sidebar"
 
-export default function OrbitsLayout({ children }: { children: React.ReactNode }) {
+export default function ScoreLayout({ children }: { children: React.ReactNode }) {
   return (
     <SidebarProvider>
       <AppSidebar />

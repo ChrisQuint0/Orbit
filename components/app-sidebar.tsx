@@ -8,13 +8,15 @@ import {
   Settings,
   PlusCircle,
   Telescope,
-  PanelLeft
+  PanelLeft,
+  LogOut
 } from "lucide-react"
 
 import {
   Sidebar,
   useSidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -26,7 +28,7 @@ import {
   SidebarSeparator,
 } from "@/components/ui/sidebar"
 import Image from "next/image"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 const data = {
   navMain: [
     {
@@ -43,18 +45,8 @@ const data = {
   navSecondary: [
     {
       title: "Orbit Score",
-      url: "#",
+      url: "/score",
       icon: Star,
-    },
-    {
-      title: "History",
-      url: "#",
-      icon: History,
-    },
-    {
-      title: "Settings",
-      url: "#",
-      icon: Settings,
     },
   ]
 }
@@ -62,6 +54,12 @@ const data = {
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { toggleSidebar, state } = useSidebar()
   const pathname = usePathname()
+  const router = useRouter()
+  
+  const handleLogout = async () => {
+    // Mock logout - simply redirect
+    router.push("/");
+  }
   
   return (
     <Sidebar collapsible="icon" className="border-r-0" {...props}>
@@ -159,6 +157,20 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+      <SidebarFooter>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton 
+              onClick={handleLogout}
+              tooltip="Log out"
+              className="!bg-transparent text-[var(--orbit-text-secondary)] hover:!text-[var(--orbit-danger)] hover:!bg-[var(--orbit-danger-bg)]"
+            >
+              <LogOut />
+              <span>Log out</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
       <SidebarRail />
     </Sidebar>
   )

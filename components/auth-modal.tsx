@@ -1,14 +1,14 @@
 "use client";
 
-import { usePrivy } from "@privy-io/react-auth";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { Loader2, Mail, Lock, User } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Loader2, Mail, Lock, User, X } from "lucide-react";
 
-export default function LoginPage() {
-  const { login, ready, authenticated } = usePrivy();
+export function AuthModal() {
   const router = useRouter();
-
+  const searchParams = useSearchParams();
+  const isOpen = searchParams.get("auth") === "open";
+  
   // Toggle between Sign In and Sign Up modes
   const [isSignUp, setIsSignUp] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -18,11 +18,10 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  useEffect(() => {
-    if (ready && authenticated) {
-      router.push("/dashboard");
-    }
-  }, [ready, authenticated, router]);
+  // Clean up URL parameter to close modal
+  const handleClose = () => {
+    router.replace("/");
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,11 +29,10 @@ export default function LoginPage() {
 
     try {
       if (isSignUp) {
-        // TODO: Implement Privy email/password signup
-        // Then save `fullName` to your Supabase 'users' table
+        // TODO: Implement actual signup
         console.log("Signing up with:", { fullName, email, password });
       } else {
-        // TODO: Implement Privy email/password login
+        // TODO: Implement actual login
         console.log("Logging in with:", { email, password });
       }
 
@@ -48,25 +46,42 @@ export default function LoginPage() {
     }
   };
 
+  if (!isOpen) return null;
+
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[var(--orbit-bg-app)] p-4">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+      {/* Backdrop */}
+      <div 
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
+        onClick={handleClose}
+      />
+      
       {/* Background Ambient Glow */}
       <div className="pointer-events-none absolute inset-0 z-0 flex items-center justify-center opacity-20">
         <div className="h-[40vh] w-[40vh] rounded-full bg-[var(--orbit-brand)] blur-[100px]"></div>
       </div>
 
       {/* Main Authentication Card */}
-      <div className="orbit-card relative z-10 w-full max-w-md flex-col p-orbit-8 backdrop-blur-xl bg-[var(--orbit-bg-card)]/90 shadow-2xl">
+      <div className="orbit-card relative z-10 w-full max-w-md flex-col p-orbit-8 backdrop-blur-xl bg-[var(--orbit-bg-card)]/90 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+        
+        {/* Close Button */}
+        <button 
+          onClick={handleClose}
+          className="absolute right-4 top-4 rounded-full p-2 text-[var(--orbit-text-secondary)] hover:bg-[var(--orbit-bg-elevated)] hover:text-white transition-colors"
+        >
+          <X className="h-4 w-4" />
+        </button>
+
         {/* Header */}
-        <div className="mb-orbit-8 text-center">
+        <div className="mb-orbit-8 text-center mt-2">
           <img 
             src="/orbit_logo.png" 
             alt="Orbit Logo" 
             className="mx-auto mb-orbit-4 h-16 w-16 object-contain" 
           />
-          <h1 className="mb-orbit-1 text-2xl font-semibold tracking-tight text-[var(--orbit-text-primary)]">
+          <h2 className="mb-orbit-1 text-2xl font-semibold tracking-tight text-[var(--orbit-text-primary)]">
             {isSignUp ? "Create your Orbit account" : "Welcome back to Orbit"}
-          </h1>
+          </h2>
           <p className="text-sm text-[var(--orbit-text-secondary)]">
             {isSignUp
               ? "Build savings and reputation together."
@@ -154,26 +169,6 @@ export default function LoginPage() {
           </button>
         </form>
 
-        {/* Divider */}
-        <div className="my-orbit-6 flex items-center gap-4">
-          <div className="h-[1px] flex-1 bg-[var(--orbit-border)]"></div>
-          <span className="text-xs text-[var(--orbit-text-muted)] uppercase tracking-wider font-medium">
-            or
-          </span>
-          <div className="h-[1px] flex-1 bg-[var(--orbit-border)]"></div>
-        </div>
-
-        {/* Google Fallback */}
-        <button
-          type="button"
-          onClick={login}
-          disabled={isLoading}
-          className="orbit-btn-neutral flex w-full items-center justify-center gap-3 py-3 text-[14px] text-[var(--orbit-text-primary)] disabled:opacity-50"
-        >
-          <GoogleIcon />
-          Continue with Google
-        </button>
-
         {/* Toggle State Footer */}
         <div className="mt-orbit-6 text-center text-sm text-[var(--orbit-text-secondary)]">
           {isSignUp ? "Already have an account? " : "Don't have an account? "}
@@ -186,33 +181,5 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
-  );
-}
-
-function GoogleIcon() {
-  return (
-    <svg
-      className="h-5 w-5"
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        d="M22.56 12.25C22.56 11.47 22.49 10.72 22.36 10H12V14.26H17.92C17.66 15.63 16.88 16.79 15.71 17.57V20.34H19.28C21.36 18.42 22.56 15.6 22.56 12.25Z"
-        fill="#4285F4"
-      />
-      <path
-        d="M12 23C14.97 23 17.46 22.02 19.28 20.34L15.71 17.57C14.73 18.23 13.48 18.64 12 18.64C9.14 18.64 6.71 16.71 5.84 14.09H2.18V16.93C3.99 20.53 7.7 23 12 23Z"
-        fill="#34A853"
-      />
-      <path
-        d="M5.84 14.09C5.62 13.43 5.49 12.73 5.49 12C5.49 11.27 5.62 10.57 5.84 9.91V7.07H2.18C1.43 8.55 1 10.22 1 12C1 13.78 1.43 15.45 2.18 16.93L5.84 14.09Z"
-        fill="#FBBC05"
-      />
-      <path
-        d="M12 5.36C13.62 5.36 15.06 5.92 16.21 7.01L19.36 3.86C17.45 2.09 14.97 1 12 1C7.7 1 3.99 3.47 2.18 7.07L5.84 9.91C6.71 7.29 9.14 5.36 12 5.36Z"
-        fill="#EA4335"
-      />
-    </svg>
   );
 }

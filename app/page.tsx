@@ -6,6 +6,8 @@ import { TrustSection } from "@/components/trust-section";
 import { OrbitScore } from "@/components/orbit-score";
 import { FinalCta } from "@/components/final-cta";
 import { Footer } from "@/components/footer";
+import { AuthModal } from "@/components/auth-modal";
+import { Suspense } from "react";
 
 export default function Home() {
   return (
@@ -36,6 +38,9 @@ export default function Home() {
         <FinalCta />
       </main>
       <Footer />
+      <Suspense fallback={null}>
+        <AuthModal />
+      </Suspense>
     </div>
   );
 }
