@@ -1,14 +1,112 @@
 "use client";
 
-import React, { useState } from "react";
-import { ArrowRight, PlusCircle, Users, Wallet, CheckCircle2, ChevronRight, X, AlertCircle } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { ArrowRight, PlusCircle, Users, Wallet, CheckCircle2, ChevronRight, X, AlertCircle, Loader2 } from "lucide-react";
+import { supabase } from "@/lib/supabase";
+import { useRouter } from "next/navigation";
 
 export default function Dashboard() {
+  const router = useRouter();
+  const [profile, setProfile] = useState<any>(null);
+  const [activities, setActivities] = useState<any[]>([]);
+  const [isPageLoading, setIsPageLoading] = useState(true);
+
   const [walletBalance, setWalletBalance] = useState(0);
-  const [activeOrbits, setActiveOrbits] = useState(1);
+  const [activeOrbits, setActiveOrbits] = useState(0);
+  const [achievements, setAchievements] = useState(0);
   const [isFundingOpen, setIsFundingOpen] = useState(false);
   const [fundingStep, setFundingStep] = useState<"amount" | "checkout" | "success">("amount");
   const [fundingAmount, setFundingAmount] = useState<number>(0);
+
+  useEffect(() => {
+    async function loadData() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        router.push("/?auth=open");
+        return;
+      }
+
+      // Fetch user profile
+      const { data: profileData } = await supabase
+        .from("users")
+        .select("*")
+        .eq("id", user.id)
+        .single();
+
+      if (profileData) {
+        setProfile(profileData);
+        setWalletBalance(Number(profileData.wallet_balance) || 0);
+      }
+
+      // Fetch active orbits count
+      const { count } = await supabase
+        .from("orbit_members")
+        .select("*", { count: 'exact', head: true })
+        .eq("user_id", user.id);
+
+      setActiveOrbits(count || 0);
+
+      // Fetch activity feed
+      const { data: activityData } = await supabase
+        .from("activity_feed")
+        .select(`
+          id,
+          action_type,
+          message,
+          created_at,
+          orbits ( name ),
+          users ( full_name )
+        `)
+        .order("created_at", { ascending: false })
+        .limit(5);
+
+      if (activityData) {
+        setActivities(activityData);
+      }
+
+      // Fetch achievements count
+      const { count: badgeCount } = await supabase
+        .from("user_badges")
+        .select("*", { count: 'exact', head: true })
+        .eq("user_id", user.id);
+
+      setAchievements(badgeCount || 0);
+
+      setIsPageLoading(false);
+    }
+    loadData();
+  }, [router]);
+
+  if (isPageLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <Loader2 className="h-8 w-8 animate-spin text-[var(--orbit-brand)]" />
+      </div>
+    );
+  }
+
+  const formatTimeAgo = (dateStr: string) => {
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const minutes = Math.floor(diff / 60000);
+    if (minutes < 1) return "Just now";
+    if (minutes < 60) return `${minutes}m ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}h ago`;
+    return `${Math.floor(hours / 24)}d ago`;
+  };
+
+  const getActivityIcon = (type: string, name?: string) => {
+    if (type === 'PAYOUT') return <CheckCircle2 className="text-[var(--orbit-success)]" size={18} />;
+    if (type === 'JOINED' || type === 'CREATED') return <Users className="text-[var(--orbit-warning)]" size={18} />;
+    const initial = name ? name.charAt(0).toUpperCase() : 'O';
+    return <span className="text-sm font-bold text-[var(--orbit-brand-light)]">{initial}</span>;
+  };
+
+  const getActivityBg = (type: string) => {
+    if (type === 'PAYOUT') return "bg-[var(--orbit-success-bg)]";
+    if (type === 'JOINED' || type === 'CREATED') return "bg-[var(--orbit-warning-bg)]";
+    return "bg-[var(--orbit-brand-bg)]";
+  };
 
   const openFundingModal = () => {
     setFundingStep("amount");
@@ -27,6 +125,13 @@ export default function Dashboard() {
     e.preventDefault();
     setFundingStep("success");
     setWalletBalance((prev) => prev + fundingAmount);
+  };
+
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good morning,";
+    if (hour < 18) return "Good afternoon,";
+    return "Good evening,";
   };
 
   return (
@@ -74,10 +179,10 @@ export default function Dashboard() {
       {/* Greeting */}
       <div className="flex flex-col gap-1">
         <h1 className="text-sm font-medium text-[var(--orbit-text-secondary)]">
-          Good evening,
+          {getGreeting()}
         </h1>
         <h2 className="text-3xl sm:text-4xl leading-tight font-bold bg-gradient-to-r from-white via-white to-white/60 bg-clip-text text-transparent">
-          Chris
+          {profile?.full_name ? profile.full_name.split(' ')[0] : 'Member'}
         </h2>
       </div>
 
@@ -128,7 +233,7 @@ export default function Dashboard() {
             <div className="text-xs font-semibold uppercase tracking-wider text-[var(--orbit-text-secondary)] mb-2">
               Orbit Score
             </div>
-            <div className="text-3xl font-bold tracking-tight text-[var(--orbit-success)] group-hover:text-[var(--orbit-success)] transition-colors">96</div>
+            <div className="text-3xl font-bold tracking-tight text-[var(--orbit-success)] group-hover:text-[var(--orbit-success)] transition-colors">{profile?.orbit_score || 0}</div>
           </div>
         </div>
 
@@ -139,7 +244,7 @@ export default function Dashboard() {
               Total Saved
             </div>
             <div className="flex items-baseline gap-1.5">
-              <span className="text-3xl font-bold tracking-tight text-[var(--orbit-text-primary)]">340</span>
+              <span className="text-3xl font-bold tracking-tight text-[var(--orbit-text-primary)]">{profile?.total_saved || 0}</span>
               <span className="text-sm font-semibold text-[var(--orbit-text-secondary)]">USDC</span>
             </div>
           </div>
@@ -310,33 +415,25 @@ export default function Dashboard() {
               RECENT ACTIVITY
             </h3>
             <div className="bg-[var(--orbit-bg-card)] border border-[var(--orbit-border)] rounded-2xl p-2">
-              <div className="flex items-center gap-4 p-3 hover:bg-[var(--orbit-bg-elevated)] rounded-xl transition-colors">
-                <div className="w-10 h-10 rounded-full bg-[var(--orbit-brand-bg)] flex items-center justify-center shrink-0">
-                  <span className="text-sm font-bold text-[var(--orbit-brand-light)]">J</span>
+              {activities.length === 0 ? (
+                <div className="p-6 text-center text-sm text-[var(--orbit-text-secondary)]">
+                  No recent activity yet.
                 </div>
-                <div className="flex-1">
-                  <p className="text-sm text-white">Jenny deposited 100 USDC</p>
-                  <p className="text-xs text-[var(--orbit-text-secondary)]">Factory Crew Orbit • 2 hours ago</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-4 p-3 hover:bg-[var(--orbit-bg-elevated)] rounded-xl transition-colors">
-                <div className="w-10 h-10 rounded-full bg-[var(--orbit-success-bg)] flex items-center justify-center shrink-0">
-                  <CheckCircle2 className="text-[var(--orbit-success)]" size={18} />
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm text-white">Mark received Cycle 2 payout</p>
-                  <p className="text-xs text-[var(--orbit-text-secondary)]">Tech Founders • 5 hours ago</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-4 p-3 hover:bg-[var(--orbit-bg-elevated)] rounded-xl transition-colors">
-                <div className="w-10 h-10 rounded-full bg-[var(--orbit-warning-bg)] flex items-center justify-center shrink-0">
-                  <Users className="text-[var(--orbit-warning)]" size={18} />
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm text-white">Weekend Fund reached full membership</p>
-                  <p className="text-xs text-[var(--orbit-text-secondary)]">Weekend Fund • 1 day ago</p>
-                </div>
-              </div>
+              ) : (
+                activities.map((activity) => (
+                  <div key={activity.id} className="flex items-center gap-4 p-3 hover:bg-[var(--orbit-bg-elevated)] rounded-xl transition-colors">
+                    <div className={`w-10 h-10 rounded-full ${getActivityBg(activity.action_type)} flex items-center justify-center shrink-0`}>
+                      {getActivityIcon(activity.action_type, activity.users?.full_name)}
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm text-white">{activity.message}</p>
+                      <p className="text-xs text-[var(--orbit-text-secondary)]">
+                        {activity.orbits?.name || 'Orbit'} • {formatTimeAgo(activity.created_at)}
+                      </p>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
 
@@ -358,21 +455,21 @@ export default function Dashboard() {
                   <circle className="text-[var(--orbit-success)] stroke-current" strokeWidth="8" strokeLinecap="round" cx="50" cy="50" r="40" fill="transparent" strokeDasharray="251.2" strokeDashoffset="10.048"></circle>
                 </svg>
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-[var(--orbit-success)]">
-                  <span className="text-4xl font-bold">96</span>
+                  <span className="text-4xl font-bold">{profile?.orbit_score || 0}</span>
                 </div>
               </div>
 
-              <h4 className="text-lg font-bold text-white mb-1">Excellent Score</h4>
-              <p className="text-sm text-[var(--orbit-text-secondary)] mb-6">Top 5% of all Orbit members</p>
+              <h4 className="text-lg font-bold text-white mb-1">{profile?.tier || 'Newcomer'}</h4>
+              <p className="text-sm text-[var(--orbit-text-secondary)] mb-6">Build your reputation.</p>
 
               <div className="w-full grid grid-cols-2 gap-4 mb-6">
                 <div className="bg-[var(--orbit-bg-app)] rounded-xl p-3 text-center border border-[var(--orbit-border)]">
                   <div className="text-xs text-[var(--orbit-text-secondary)] mb-1">Reliability</div>
-                  <div className="text-lg font-semibold text-white">100%</div>
+                  <div className="text-lg font-semibold text-white">{profile?.reliability_rate || 100}%</div>
                 </div>
                 <div className="bg-[var(--orbit-bg-app)] rounded-xl p-3 text-center border border-[var(--orbit-border)]">
                   <div className="text-xs text-[var(--orbit-text-secondary)] mb-1">Achievements</div>
-                  <div className="text-lg font-semibold text-white">8</div>
+                  <div className="text-lg font-semibold text-white">{achievements}</div>
                 </div>
               </div>
 

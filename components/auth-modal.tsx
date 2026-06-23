@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2, Mail, Lock, User, X, AlertCircle } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import { setupUserWallet } from "@/app/actions/wallet";
 
 export function AuthModal() {
   const router = useRouter();
@@ -41,9 +42,19 @@ export function AuthModal() {
             },
           },
         });
-        
         if (error) throw error;
         console.log("Signed up:", data);
+
+        if (data.user) {
+          // Automatically set up Stellar wallet
+          const walletRes = await setupUserWallet(data.user.id);
+          if (!walletRes.success) {
+            console.error("Wallet generation failed:", walletRes.error);
+            setErrorMsg("Account created, but wallet generation failed. Please contact support.");
+            setIsLoading(false);
+            return;
+          }
+        }
       } else {
         const { data, error } = await supabase.auth.signInWithPassword({
           email,
