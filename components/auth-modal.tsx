@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Loader2, Mail, Lock, User, X } from "lucide-react";
+import { Loader2, Mail, Lock, User, X, AlertCircle } from "lucide-react";
+import { supabase } from "@/lib/supabase";
 
 export function AuthModal() {
   const router = useRouter();
@@ -17,6 +18,7 @@ export function AuthModal() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
 
   // Clean up URL parameter to close modal
   const handleClose = () => {
@@ -26,22 +28,39 @@ export function AuthModal() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setErrorMsg("");
 
     try {
       if (isSignUp) {
-        // TODO: Implement actual signup
-        console.log("Signing up with:", { fullName, email, password });
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              full_name: fullName,
+            },
+          },
+        });
+        
+        if (error) throw error;
+        console.log("Signed up:", data);
       } else {
-        // TODO: Implement actual login
-        console.log("Logging in with:", { email, password });
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+        
+        if (error) throw error;
+        console.log("Logged in:", data);
       }
 
-      // Simulate front-end login success
+      // Simulate front-end login success transition
       setTimeout(() => {
         router.push("/dashboard");
       }, 800);
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
+      setErrorMsg(error.message || "An unexpected error occurred.");
       setIsLoading(false);
     }
   };
@@ -91,6 +110,13 @@ export function AuthModal() {
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="flex flex-col gap-orbit-4">
+          {errorMsg && (
+            <div className="flex items-center gap-2 rounded-md bg-red-500/10 p-3 text-sm text-red-500 border border-red-500/20">
+              <AlertCircle className="h-4 w-4 shrink-0" />
+              <p>{errorMsg}</p>
+            </div>
+          )}
+
           {/* Sign Up Specific Fields */}
           {isSignUp && (
             <div className="flex flex-col gap-1.5">
